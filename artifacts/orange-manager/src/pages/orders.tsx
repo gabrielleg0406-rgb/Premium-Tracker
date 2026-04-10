@@ -1,14 +1,23 @@
 import { useState } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { useListOrders, useCreateOrder, OrderStatus, OrderDeliveryType, OrderPaymentType, useListCustomers, useListProducts } from "@workspace/api-client-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useListOrders, OrderStatus } from "@workspace/api-client-react";
+import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Filter } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+
+const statusLabel: Record<string, string> = {
+  pending: 'Pendente',
+  in_production: 'Em Produção',
+  ready: 'Pronto',
+  delivered: 'Entregue',
+  cancelled: 'Cancelado',
+};
 
 export default function Orders() {
   const [page, setPage] = useState(1);
@@ -22,11 +31,11 @@ export default function Orders() {
 
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
-      case 'pending': return 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/10 dark:text-amber-500';
-      case 'in_production': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/10 dark:text-blue-500';
-      case 'ready': return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/10 dark:text-purple-500';
-      case 'delivered': return 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-500';
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/10 dark:text-red-500';
+      case 'pending': return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'in_production': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'ready': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'delivered': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -34,12 +43,12 @@ export default function Orders() {
   return (
     <div className="flex-1 flex flex-col">
       <PageHeader 
-        title="Orders" 
-        description="Manage customer orders and track their fulfillment status."
+        title="Pedidos" 
+        description="Gerencie pedidos de clientes e acompanhe o status de execução."
         actions={
           <Button className="gap-2">
             <Plus className="w-4 h-4" />
-            New Order
+            Novo Pedido
           </Button>
         }
       />
@@ -49,7 +58,7 @@ export default function Orders() {
           <div className="p-4 border-b flex items-center gap-4 bg-muted/20">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Search orders..." className="pl-9 bg-background" />
+              <Input type="search" placeholder="Buscar pedidos..." className="pl-9 bg-background" />
             </div>
             <Button variant="outline" size="icon" className="shrink-0 bg-background">
               <Filter className="h-4 w-4 text-muted-foreground" />
@@ -58,12 +67,12 @@ export default function Orders() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead>Order #</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Amount</TableHead>
+                <TableHead>Nº Pedido</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Produto</TableHead>
+                <TableHead>Valor</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>Data</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -93,19 +102,19 @@ export default function Orders() {
                       {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(order.totalPrice)}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`capitalize ${getStatusColor(order.status)}`}>
-                        {order.status.replace('_', ' ')}
+                      <Badge variant="outline" className={`${getStatusColor(order.status)}`}>
+                        {statusLabel[order.status] || order.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {format(new Date(order.createdAt), "MMM d, yyyy")}
+                      {format(new Date(order.createdAt), "d MMM yyyy", { locale: ptBR })}
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                    No orders found.
+                    Nenhum pedido encontrado.
                   </TableCell>
                 </TableRow>
               )}

@@ -14,6 +14,8 @@ import {
 import { Package, ShoppingCart, Truck, CheckCircle2, TrendingUp, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { ReactNode } from "react";
 
 export default function Dashboard() {
   const { data: summary, isLoading: isLoadingSummary } = useGetDashboardSummary();
@@ -22,25 +24,25 @@ export default function Dashboard() {
   const { data: qualityAlerts, isLoading: isLoadingAlerts } = useGetDashboardQualityAlerts();
 
   const pieData = orderBreakdown ? [
-    { name: 'Pending', value: orderBreakdown.pending, color: '#f59e0b' },
-    { name: 'In Production', value: orderBreakdown.inProduction, color: '#3b82f6' },
-    { name: 'Ready', value: orderBreakdown.ready, color: '#8b5cf6' },
-    { name: 'Delivered', value: orderBreakdown.delivered, color: '#10b981' },
-    { name: 'Cancelled', value: orderBreakdown.cancelled, color: '#ef4444' },
+    { name: 'Pendente', value: orderBreakdown.pending, color: '#f59e0b' },
+    { name: 'Em Produção', value: orderBreakdown.inProduction, color: '#3b82f6' },
+    { name: 'Pronto', value: orderBreakdown.ready, color: '#8b5cf6' },
+    { name: 'Entregue', value: orderBreakdown.delivered, color: '#10b981' },
+    { name: 'Cancelado', value: orderBreakdown.cancelled, color: '#ef4444' },
   ].filter(d => d.value > 0) : [];
 
   return (
     <div className="flex-1 flex flex-col">
       <PageHeader 
         title="Dashboard" 
-        description="Overview of production, orders, and quality metrics." 
+        description="Visão geral de produção, pedidos e métricas de qualidade." 
       />
       
       <div className="p-6 sm:p-8 space-y-6 sm:space-y-8 flex-1 overflow-y-auto">
         {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           <KpiCard 
-            title="Daily Production" 
+            title="Produção Diária" 
             value={summary?.dailyProduction ? `${summary.dailyProduction} kg` : "0 kg"}
             icon={<FactoryIcon className="w-4 h-4 text-muted-foreground" />}
             isLoading={isLoadingSummary}
@@ -48,28 +50,28 @@ export default function Dashboard() {
             trendUp
           />
           <KpiCard 
-            title="Pending Orders" 
+            title="Pedidos Pendentes" 
             value={summary?.pendingOrders?.toString() || "0"}
             icon={<ShoppingCart className="w-4 h-4 text-muted-foreground" />}
             isLoading={isLoadingSummary}
           />
           <KpiCard 
-            title="Pending Deliveries" 
+            title="Entregas Pendentes" 
             value={summary?.pendingDeliveries?.toString() || "0"}
             icon={<Truck className="w-4 h-4 text-muted-foreground" />}
             isLoading={isLoadingSummary}
           />
           <KpiCard 
-            title="Quality Approval" 
+            title="Aprovação de Qualidade" 
             value={summary?.qualityApprovalRate ? `${(summary.qualityApprovalRate * 100).toFixed(1)}%` : "0%"}
             icon={<CheckCircle2 className="w-4 h-4 text-muted-foreground" />}
             isLoading={isLoadingSummary}
-            trend="+0.5%"
+            trend="+0,5%"
             trendUp
           />
           <KpiCard 
-            title="Current Stock" 
-            value={summary?.currentStockKg ? `${summary.currentStockKg.toLocaleString()} kg` : "0 kg"}
+            title="Estoque Atual" 
+            value={summary?.currentStockKg ? `${summary.currentStockKg.toLocaleString('pt-BR')} kg` : "0 kg"}
             icon={<Package className="w-4 h-4 text-muted-foreground" />}
             isLoading={isLoadingSummary}
             className="sm:col-span-2 lg:col-span-4 xl:col-span-1"
@@ -80,7 +82,7 @@ export default function Dashboard() {
           {/* Production Chart */}
           <Card className="lg:col-span-2 shadow-sm border-border/50">
             <CardHeader>
-              <CardTitle className="text-base font-medium">Production Volume (Last 30 Days)</CardTitle>
+              <CardTitle className="text-base font-medium">Volume de Produção (Últimos 30 Dias)</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoadingChart ? (
@@ -98,7 +100,7 @@ export default function Dashboard() {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                       <XAxis 
                         dataKey="date" 
-                        tickFormatter={(val) => format(new Date(val), "MMM d")}
+                        tickFormatter={(val) => format(new Date(val), "d MMM", { locale: ptBR })}
                         tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
                         axisLine={false}
                         tickLine={false}
@@ -112,12 +114,12 @@ export default function Dashboard() {
                       />
                       <Tooltip 
                         contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                        labelFormatter={(val) => format(new Date(val), "MMM d, yyyy")}
+                        labelFormatter={(val) => format(new Date(val), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
                       />
                       <Area 
                         type="monotone" 
                         dataKey="juiceKg" 
-                        name="Juice (kg)" 
+                        name="Suco (kg)" 
                         stroke="hsl(var(--primary))" 
                         strokeWidth={2}
                         fillOpacity={1} 
@@ -128,7 +130,7 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm border border-dashed rounded-lg bg-muted/30">
-                  No production data available
+                  Nenhum dado de produção disponível.
                 </div>
               )}
             </CardContent>
@@ -137,7 +139,7 @@ export default function Dashboard() {
           {/* Order Status */}
           <Card className="shadow-sm border-border/50">
             <CardHeader>
-              <CardTitle className="text-base font-medium">Order Status</CardTitle>
+              <CardTitle className="text-base font-medium">Status dos Pedidos</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoadingBreakdown ? (
@@ -168,7 +170,7 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm border border-dashed rounded-lg bg-muted/30">
-                  No orders to display
+                  Nenhum pedido para exibir.
                 </div>
               )}
             </CardContent>
@@ -179,7 +181,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="text-base font-medium flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-destructive" />
-                Recent Quality Alerts
+                Alertas de Qualidade Recentes
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -207,7 +209,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                           <span className="capitalize">{alert.type.replace('_', ' ')}</span>
                           <span>•</span>
-                          <span>{format(new Date(alert.createdAt), "MMM d, h:mm a")}</span>
+                          <span>{format(new Date(alert.createdAt), "d MMM, HH:mm", { locale: ptBR })}</span>
                         </div>
                       </div>
                     </div>
@@ -216,7 +218,7 @@ export default function Dashboard() {
               ) : (
                 <div className="py-12 flex flex-col items-center justify-center text-muted-foreground text-sm border border-dashed rounded-lg bg-muted/30">
                   <CheckCircle2 className="w-8 h-8 text-secondary mb-2" />
-                  <p>All clear! No active quality alerts.</p>
+                  <p>Tudo certo! Nenhum alerta de qualidade ativo.</p>
                 </div>
               )}
             </CardContent>

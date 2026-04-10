@@ -1,13 +1,28 @@
 import { PageHeader } from "@/components/layout/PageHeader";
-import { useListProductionLots, ProductionLotStatus, ProductionLotQualityStatus, useGetProductionStats } from "@workspace/api-client-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useListProductionLots, ProductionLotStatus, useGetProductionStats } from "@workspace/api-client-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Filter, Factory, CheckCircle2, AlertTriangle, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
+
+const lotStatusLabel: Record<string, string> = {
+  pending: 'Pendente',
+  in_production: 'Em Produção',
+  finished: 'Finalizado',
+  quality_approved: 'Aprovado',
+  quality_rejected: 'Reprovado',
+};
+
+const qualityStatusLabel: Record<string, string> = {
+  pending: 'Pendente',
+  approved: 'Aprovado',
+  rejected: 'Reprovado',
+};
 
 export default function Production() {
   const { data: lots, isLoading } = useListProductionLots();
@@ -16,10 +31,10 @@ export default function Production() {
   const getStatusColor = (status: ProductionLotStatus) => {
     switch (status) {
       case 'pending': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'in_production': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/10 dark:text-blue-500';
-      case 'finished': return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/10 dark:text-purple-500';
-      case 'quality_approved': return 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-500';
-      case 'quality_rejected': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/10 dark:text-red-500';
+      case 'in_production': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'finished': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'quality_approved': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'quality_rejected': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -27,12 +42,12 @@ export default function Production() {
   return (
     <div className="flex-1 flex flex-col">
       <PageHeader 
-        title="Production" 
-        description="Manage production lots and quality control."
+        title="Produção" 
+        description="Gerencie lotes de produção e controle de qualidade."
         actions={
           <Button className="gap-2">
             <Plus className="w-4 h-4" />
-            New Lot
+            Novo Lote
           </Button>
         }
       />
@@ -44,18 +59,18 @@ export default function Production() {
           <Card className="shadow-sm border-border/50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm font-medium text-muted-foreground">Today's Production</p>
+                <p className="text-sm font-medium text-muted-foreground">Produção Hoje</p>
                 <div className="p-2 bg-muted/50 rounded-md"><Factory className="w-4 h-4 text-muted-foreground" /></div>
               </div>
               {isLoadingStats ? <Skeleton className="h-8 w-24" /> : (
-                <h3 className="text-2xl font-semibold tracking-tight text-foreground">{stats?.todayProduced ? `${stats.todayProduced.toLocaleString()} kg` : "0 kg"}</h3>
+                <h3 className="text-2xl font-semibold tracking-tight text-foreground">{stats?.todayProduced ? `${stats.todayProduced.toLocaleString('pt-BR')} kg` : "0 kg"}</h3>
               )}
             </CardContent>
           </Card>
           <Card className="shadow-sm border-border/50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm font-medium text-muted-foreground">Active Lots</p>
+                <p className="text-sm font-medium text-muted-foreground">Lotes Ativos</p>
                 <div className="p-2 bg-blue-500/10 text-blue-500 rounded-md"><Clock className="w-4 h-4" /></div>
               </div>
               {isLoadingStats ? <Skeleton className="h-8 w-16" /> : (
@@ -66,7 +81,7 @@ export default function Production() {
           <Card className="shadow-sm border-border/50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm font-medium text-muted-foreground">Approval Rate</p>
+                <p className="text-sm font-medium text-muted-foreground">Taxa de Aprovação</p>
                 <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-md"><CheckCircle2 className="w-4 h-4" /></div>
               </div>
               {isLoadingStats ? <Skeleton className="h-8 w-16" /> : (
@@ -77,11 +92,13 @@ export default function Production() {
           <Card className="shadow-sm border-border/50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm font-medium text-muted-foreground">Avg Brix</p>
+                <p className="text-sm font-medium text-muted-foreground">Brix Médio</p>
                 <div className="p-2 bg-amber-500/10 text-amber-500 rounded-md"><AlertTriangle className="w-4 h-4" /></div>
               </div>
               {isLoadingStats ? <Skeleton className="h-8 w-16" /> : (
-                <h3 className="text-2xl font-semibold tracking-tight text-foreground">{stats?.averageBrix ? `${stats.averageBrix}°Bx` : "-"}</h3>
+                <h3 className="text-2xl font-semibold tracking-tight text-foreground">
+                  {stats?.averageBrix ? `${Number(stats.averageBrix).toFixed(1)}°Bx` : "-"}
+                </h3>
               )}
             </CardContent>
           </Card>
@@ -91,7 +108,7 @@ export default function Production() {
           <div className="p-4 border-b flex items-center gap-4 bg-muted/20">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Search lots..." className="pl-9 bg-background" />
+              <Input type="search" placeholder="Buscar lotes..." className="pl-9 bg-background" />
             </div>
             <Button variant="outline" size="icon" className="shrink-0 bg-background">
               <Filter className="h-4 w-4 text-muted-foreground" />
@@ -100,12 +117,12 @@ export default function Production() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead>Lot Code</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Quantity</TableHead>
+                <TableHead>Código do Lote</TableHead>
+                <TableHead>Produto</TableHead>
+                <TableHead>Quantidade</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Quality</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>Qualidade</TableHead>
+                <TableHead>Data</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -127,28 +144,28 @@ export default function Production() {
                     <TableCell>{lot.productName}</TableCell>
                     <TableCell>{lot.quantityProduced} {lot.unit}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`capitalize ${getStatusColor(lot.status)}`}>
-                        {lot.status.replace('_', ' ')}
+                      <Badge variant="outline" className={getStatusColor(lot.status)}>
+                        {lotStatusLabel[lot.status] || lot.status}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`capitalize ${
+                      <Badge variant="outline" className={`${
                         lot.qualityStatus === 'approved' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
                         lot.qualityStatus === 'rejected' ? 'bg-red-100 text-red-800 border-red-200' :
                         'bg-gray-100 text-gray-800 border-gray-200'
                       }`}>
-                        {lot.qualityStatus}
+                        {qualityStatusLabel[lot.qualityStatus] || lot.qualityStatus}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {format(new Date(lot.createdAt), "MMM d, yyyy")}
+                      {format(new Date(lot.createdAt), "d MMM yyyy", { locale: ptBR })}
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                    No production lots found.
+                    Nenhum lote de produção encontrado.
                   </TableCell>
                 </TableRow>
               )}

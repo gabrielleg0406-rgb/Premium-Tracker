@@ -6,18 +6,24 @@ import { Plus, Package, Citrus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
+const typeLabel: Record<string, string> = {
+  juice: 'Suco',
+  fruit: 'Fruta',
+  byproduct: 'Subproduto',
+};
+
 export default function Products() {
   const { data: products, isLoading } = useListProducts();
 
   return (
     <div className="flex-1 flex flex-col">
       <PageHeader 
-        title="Product Catalog" 
-        description="Manage the portfolio of products you sell."
+        title="Catálogo de Produtos" 
+        description="Gerencie o portfólio de produtos que você comercializa."
         actions={
           <Button className="gap-2">
             <Plus className="w-4 h-4" />
-            New Product
+            Novo Produto
           </Button>
         }
       />
@@ -48,25 +54,25 @@ export default function Products() {
                     <div className="p-2 bg-primary/10 text-primary rounded-lg">
                       {product.type === 'juice' ? <Package className="w-5 h-5" /> : <Citrus className="w-5 h-5" />}
                     </div>
-                    <Badge variant="secondary" className="capitalize text-xs font-normal">
-                      {product.type}
+                    <Badge variant="secondary" className="text-xs font-normal">
+                      {typeLabel[product.type] || product.type}
                     </Badge>
                   </div>
                   <CardTitle className="text-lg mt-4">{product.name}</CardTitle>
                   <CardDescription className="line-clamp-2 min-h-[40px] text-sm">
-                    {product.description || "No description provided."}
+                    {product.description || "Nenhuma descrição fornecida."}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between mt-2 pt-4 border-t border-border/50">
                     <div className="flex flex-col">
-                      <span className="text-sm text-muted-foreground">Price</span>
+                      <span className="text-sm text-muted-foreground">Preço</span>
                       <span className="font-semibold text-foreground">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.pricePerUnit)}
                         <span className="text-muted-foreground text-xs font-normal"> / {product.unit}</span>
                       </span>
                     </div>
-                    <Button variant="outline" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">Edit</Button>
+                    <Button variant="outline" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">Editar</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -74,7 +80,7 @@ export default function Products() {
           ) : (
             <div className="col-span-full py-12 flex flex-col items-center justify-center text-muted-foreground text-sm border border-dashed rounded-lg bg-muted/30">
               <Package className="w-8 h-8 mb-3 text-muted-foreground/50" />
-              <p>No products found. Create your first product to get started.</p>
+              <p>Nenhum produto encontrado. Crie seu primeiro produto para começar.</p>
             </div>
           )}
         </div>

@@ -21,12 +21,12 @@ export default function Customers() {
   return (
     <div className="flex-1 flex flex-col">
       <PageHeader 
-        title="Customers" 
-        description="Manage your B2B clients and view their order history."
+        title="Clientes" 
+        description="Gerencie seus clientes B2B e visualize o histórico de pedidos."
         actions={
           <Button className="gap-2">
             <Plus className="w-4 h-4" />
-            Add Customer
+            Adicionar Cliente
           </Button>
         }
       />
@@ -38,7 +38,7 @@ export default function Customers() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
                 type="search" 
-                placeholder="Search customers by name or CNPJ..." 
+                placeholder="Buscar por nome ou CNPJ..." 
                 className="pl-9 bg-background"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -48,11 +48,11 @@ export default function Customers() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead>Customer</TableHead>
+                <TableHead>Cliente</TableHead>
                 <TableHead>CNPJ</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead className="text-right">Total Spent</TableHead>
+                <TableHead>Localização</TableHead>
+                <TableHead>Contato</TableHead>
+                <TableHead className="text-right">Total Gasto</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -95,7 +95,7 @@ export default function Customers() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                    No customers found.
+                    Nenhum cliente encontrado.
                   </TableCell>
                 </TableRow>
               )}
