@@ -4,6 +4,10 @@
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
+## Project: OrangeTrack — Sistema de Gestão de Laranjas
+
+A premium SaaS-style management system for orange production and distribution companies. Designed with Apple-inspired aesthetics (clean, minimal, structured) with orange (#F57C00) and green (#2E7D32) as primary colors. Dark sidebar, white cards, hairline borders.
+
 ## Stack
 
 - **Monorepo tool**: pnpm workspaces
@@ -15,6 +19,25 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+- **Frontend**: React + Vite, Tailwind CSS, shadcn/ui, Recharts, Framer Motion, Wouter
+
+## Artifacts
+
+- **orange-manager** (react-vite, `/`) — Main frontend app
+- **api-server** (api, `/api`) — Express backend
+
+## Modules
+
+- Dashboard — KPI cards, production chart, order status, quality alerts
+- Orders — Full order management with status workflow
+- Customers — Customer CRUD with purchase history
+- Products — Product catalog management
+- Raw Materials — Incoming orange batch tracking
+- Production — Production lot management with quality control (Brix/temperature)
+- Inventory — Stock tracking with entries/exits
+- Traceability — Full lot timeline from raw material to delivery
+- Deliveries — Delivery routing and status tracking
+- Reports — Production, Financial, Quality, Discard reports
 
 ## Key Commands
 

@@ -1,0 +1,122 @@
+Crie um sistema web premium de gestão e rastreabilidade para uma empresa produtora e distribuidora de laranjas (produção de sucos e venda de frutas).
+
+O sistema deve ter design moderno, responsivo e intuitivo, utilizando cores principais:
+- Laranja (#F57C00)
+- Verde (#2E7D32)
+- Branco e cinza claro para equilíbrio visual
+
+O sistema deve ser dividido nos seguintes módulos:
+
+---
+
+🔶 DASHBOARD PRINCIPAL
+- Visão geral com indicadores:
+  - Produção diária
+  - Pedidos em andamento
+  - Entregas pendentes
+  - Controle de qualidade
+  - Estoque atual
+- Gráficos interativos
+- Alertas de qualidade e temperatura
+
+---
+
+🔶 RASTREABILIDADE
+- Rastreio completo por lote
+- Histórico desde:
+  - Entrada da matéria-prima
+  - Produção
+  - Controle de qualidade
+  - Entrega
+- Identificação por código único de lote
+- Visualização em linha do tempo
+
+---
+
+🔶 PAINEL DE CLIENTES
+- Cadastro completo:
+  - Nome
+  - CNPJ
+  - Endereço
+  - Contato
+- Histórico de compras
+- Preferência de produtos
+
+---
+
+🔶 PAINEL DE PEDIDOS
+- Criação de pedidos com:
+  - Tipo de produto
+  - Quantidade
+  - Tipo de pagamento
+- Status:
+  - Pendente
+  - Em produção
+  - Pronto para entrega
+  - Entregue
+- Opção de envio para entrega ou retirada
+
+---
+
+🔶 CONTROLE DE ESTOQUE
+- Abertura e fechamento de caixa de estoque
+- Entrada de lotes
+- Saída por venda ou descarte
+- Controle automático de quantidades
+
+---
+
+🔶 PAINEL DE PRODUÇÃO
+- Notificação de novos pedidos
+- Marcação de produção:
+  - Em produção
+  - Finalizado
+- Registro de lote produzido
+- Controle de qualidade:
+  - Marcação de qualidade (aprovado/reprovado)
+  - Brix (nível de açúcar)
+  - Temperatura
+- Produção para estoque
+
+---
+
+🔶 PAINEL DE ENTREGAS
+- Roteirização de entregas
+- Lista de:
+  - Entregas pendentes
+  - Entregas realizadas
+- Controle por entregador
+- Status em tempo real
+
+---
+
+🔶 PAINEL ADMINISTRATIVO
+- Cadastro de produtos
+- Entrada de matéria-prima
+- Relatórios completos:
+  - Produção
+  - Financeiro
+  - Entregas por entregador
+  - Descarte
+  - Controle de qualidade
+- Filtros por período
+- Exportação de relatórios (PDF/Excel)
+
+---
+
+🔶 DIFERENCIAIS PREMIUM
+- Interface clean e moderna (estilo dashboard SaaS)
+- Animações suaves
+- Navegação lateral fixa
+- Ícones profissionais
+- Sistema rápido e fluido
+- Segurança de dados
+
+---
+
+🔶 OBJETIVO
+Criar um sistema robusto de gestão agrícola e industrial focado em:
+- Rastreabilidade completa
+- Controle de qualidade rigoroso
+- Eficiência operacional
+- Visualização clara de dados

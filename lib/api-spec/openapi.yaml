@@ -3,20 +3,40 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: OrangeTrack - Sistema de Gestão de Laranjas
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: dashboard
+    description: Dashboard summary operations
+  - name: customers
+    description: Customer management
+  - name: orders
+    description: Order management
+  - name: inventory
+    description: Inventory/stock management
+  - name: production
+    description: Production management
+  - name: deliveries
+    description: Delivery management
+  - name: traceability
+    description: Lot traceability
+  - name: products
+    description: Product management
+  - name: raw-materials
+    description: Raw material entries
+  - name: reports
+    description: Reports and analytics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +44,772 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # DASHBOARD
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary with key metrics
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/quality-alerts:
+    get:
+      operationId: getDashboardQualityAlerts
+      tags: [dashboard]
+      summary: Get active quality and temperature alerts
+      responses:
+        "200":
+          description: List of alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QualityAlert"
+
+  /dashboard/production-chart:
+    get:
+      operationId: getDashboardProductionChart
+      tags: [dashboard]
+      summary: Get daily production data for chart (last 30 days)
+      responses:
+        "200":
+          description: Chart data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductionChartPoint"
+
+  /dashboard/order-status-breakdown:
+    get:
+      operationId: getDashboardOrderStatusBreakdown
+      tags: [dashboard]
+      summary: Get order counts by status
+      responses:
+        "200":
+          description: Order breakdown
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderStatusBreakdown"
+
+  # CUSTOMERS
+  /customers:
+    get:
+      operationId: listCustomers
+      tags: [customers]
+      summary: List all customers
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerList"
+    post:
+      operationId: createCustomer
+      tags: [customers]
+      summary: Create a new customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomerBody"
+      responses:
+        "201":
+          description: Created customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+  /customers/{id}:
+    get:
+      operationId: getCustomer
+      tags: [customers]
+      summary: Get customer by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+    put:
+      operationId: updateCustomer
+      tags: [customers]
+      summary: Update a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomerBody"
+      responses:
+        "200":
+          description: Updated customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+    delete:
+      operationId: deleteCustomer
+      tags: [customers]
+      summary: Delete a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /customers/{id}/orders:
+    get:
+      operationId: getCustomerOrders
+      tags: [customers]
+      summary: Get purchase history for a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Customer orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+
+  # PRODUCTS
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all products
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "201":
+          description: Created product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    put:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ORDERS
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List all orders
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, in_production, ready, delivered, cancelled]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderList"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Created order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+    put:
+      operationId: updateOrder
+      tags: [orders]
+      summary: Update order status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderBody"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  # INVENTORY
+  /inventory:
+    get:
+      operationId: listInventory
+      tags: [inventory]
+      summary: List current inventory items
+      responses:
+        "200":
+          description: Inventory list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+
+  /inventory/summary:
+    get:
+      operationId: getInventorySummary
+      tags: [inventory]
+      summary: Get inventory summary totals by product
+      responses:
+        "200":
+          description: Inventory summary
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventorySummary"
+
+  /inventory/entries:
+    post:
+      operationId: createInventoryEntry
+      tags: [inventory]
+      summary: Add a lot entry (incoming stock)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInventoryEntryBody"
+      responses:
+        "201":
+          description: Created entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryMovement"
+
+  /inventory/exits:
+    post:
+      operationId: createInventoryExit
+      tags: [inventory]
+      summary: Register a stock exit (sale or discard)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInventoryExitBody"
+      responses:
+        "201":
+          description: Created exit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryMovement"
+
+  /inventory/movements:
+    get:
+      operationId: listInventoryMovements
+      tags: [inventory]
+      summary: List all inventory movements
+      responses:
+        "200":
+          description: Movements list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryMovement"
+
+  # PRODUCTION
+  /production/lots:
+    get:
+      operationId: listProductionLots
+      tags: [production]
+      summary: List production lots
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, in_production, finished, quality_approved, quality_rejected]
+      responses:
+        "200":
+          description: Production lots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductionLot"
+    post:
+      operationId: createProductionLot
+      tags: [production]
+      summary: Create a production lot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductionLotBody"
+      responses:
+        "201":
+          description: Created lot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionLot"
+
+  /production/lots/{id}:
+    get:
+      operationId: getProductionLot
+      tags: [production]
+      summary: Get production lot by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Production lot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionLot"
+    put:
+      operationId: updateProductionLot
+      tags: [production]
+      summary: Update production lot status or quality data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductionLotBody"
+      responses:
+        "200":
+          description: Updated lot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionLot"
+
+  /production/stats:
+    get:
+      operationId: getProductionStats
+      tags: [production]
+      summary: Get production statistics summary
+      responses:
+        "200":
+          description: Production stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionStats"
+
+  # RAW MATERIALS
+  /raw-materials:
+    get:
+      operationId: listRawMaterials
+      tags: [raw-materials]
+      summary: List raw material entries
+      responses:
+        "200":
+          description: Raw materials list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RawMaterial"
+    post:
+      operationId: createRawMaterial
+      tags: [raw-materials]
+      summary: Register raw material entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRawMaterialBody"
+      responses:
+        "201":
+          description: Created raw material
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RawMaterial"
+
+  # TRACEABILITY
+  /traceability/lots:
+    get:
+      operationId: listTraceabilityLots
+      tags: [traceability]
+      summary: List all lots for traceability
+      responses:
+        "200":
+          description: Lots list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TraceabilityLot"
+
+  /traceability/lots/{lotCode}:
+    get:
+      operationId: getTraceabilityLot
+      tags: [traceability]
+      summary: Get full traceability timeline for a lot code
+      parameters:
+        - name: lotCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lot traceability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LotTraceability"
+
+  # DELIVERIES
+  /deliveries:
+    get:
+      operationId: listDeliveries
+      tags: [deliveries]
+      summary: List all deliveries
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, in_transit, delivered, failed]
+        - name: delivererId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deliveries list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Delivery"
+    post:
+      operationId: createDelivery
+      tags: [deliveries]
+      summary: Create a delivery assignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDeliveryBody"
+      responses:
+        "201":
+          description: Created delivery
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Delivery"
+
+  /deliveries/{id}:
+    put:
+      operationId: updateDelivery
+      tags: [deliveries]
+      summary: Update delivery status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDeliveryBody"
+      responses:
+        "200":
+          description: Updated delivery
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Delivery"
+
+  /deliveries/stats:
+    get:
+      operationId: getDeliveryStats
+      tags: [deliveries]
+      summary: Get delivery statistics by deliverer
+      responses:
+        "200":
+          description: Delivery stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DelivererStats"
+
+  # REPORTS
+  /reports/production:
+    get:
+      operationId: getProductionReport
+      tags: [reports]
+      summary: Get production report
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Production report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionReport"
+
+  /reports/financial:
+    get:
+      operationId: getFinancialReport
+      tags: [reports]
+      summary: Get financial report
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Financial report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinancialReport"
+
+  /reports/quality:
+    get:
+      operationId: getQualityReport
+      tags: [reports]
+      summary: Get quality control report
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Quality report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QualityReport"
+
+  /reports/discards:
+    get:
+      operationId: getDiscardReport
+      tags: [reports]
+      summary: Get discard report
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Discard report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscardReport"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +817,808 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    # Dashboard
+    DashboardSummary:
+      type: object
+      properties:
+        dailyProduction:
+          type: number
+        pendingOrders:
+          type: integer
+        pendingDeliveries:
+          type: integer
+        qualityApprovalRate:
+          type: number
+        currentStockKg:
+          type: number
+        ordersInProduction:
+          type: integer
+        monthlyRevenue:
+          type: number
+        activeCustomers:
+          type: integer
+      required:
+        - dailyProduction
+        - pendingOrders
+        - pendingDeliveries
+        - qualityApprovalRate
+        - currentStockKg
+        - ordersInProduction
+        - monthlyRevenue
+        - activeCustomers
+
+    QualityAlert:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [temperature, brix, quality_rejected]
+        message:
+          type: string
+        lotCode:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, type, message, lotCode, severity, createdAt]
+
+    ProductionChartPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        juiceKg:
+          type: number
+        orangeKg:
+          type: number
+      required: [date, juiceKg, orangeKg]
+
+    OrderStatusBreakdown:
+      type: object
+      properties:
+        pending:
+          type: integer
+        inProduction:
+          type: integer
+        ready:
+          type: integer
+        delivered:
+          type: integer
+        cancelled:
+          type: integer
+      required: [pending, inProduction, ready, delivered, cancelled]
+
+    # Customer
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        cnpj:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        preferredProducts:
+          type: array
+          items:
+            type: string
+        totalOrders:
+          type: integer
+        totalSpent:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, cnpj, address, city, state, phone, email, createdAt]
+
+    CustomerList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Customer"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required: [data, total, page, limit]
+
+    CreateCustomerBody:
+      type: object
+      properties:
+        name:
+          type: string
+        cnpj:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        preferredProducts:
+          type: array
+          items:
+            type: string
+      required: [name, cnpj, address, city, state, phone, email]
+
+    # Product
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+          enum: [juice, fruit, byproduct]
+        unit:
+          type: string
+          enum: [kg, liter, unit, box]
+        pricePerUnit:
+          type: number
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, type, unit, pricePerUnit, createdAt]
+
+    CreateProductBody:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [juice, fruit, byproduct]
+        unit:
+          type: string
+          enum: [kg, liter, unit, box]
+        pricePerUnit:
+          type: number
+        description:
+          type: string
+      required: [name, type, unit, pricePerUnit]
+
+    # Order
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        orderNumber:
+          type: string
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        productId:
+          type: integer
+        productName:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        totalPrice:
+          type: number
+        paymentType:
+          type: string
+          enum: [cash, credit, pix, invoice]
+        status:
+          type: string
+          enum: [pending, in_production, ready, delivered, cancelled]
+        deliveryType:
+          type: string
+          enum: [delivery, pickup]
+        deliveryAddress:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orderNumber
+        - customerId
+        - customerName
+        - productId
+        - productName
+        - quantity
+        - unit
+        - totalPrice
+        - paymentType
+        - status
+        - deliveryType
+        - createdAt
+        - updatedAt
+
+    OrderList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required: [data, total, page, limit]
+
+    CreateOrderBody:
+      type: object
+      properties:
+        customerId:
+          type: integer
+        productId:
+          type: integer
+        quantity:
+          type: number
+        paymentType:
+          type: string
+          enum: [cash, credit, pix, invoice]
+        deliveryType:
+          type: string
+          enum: [delivery, pickup]
+        deliveryAddress:
+          type: string
+        notes:
+          type: string
+      required: [customerId, productId, quantity, paymentType, deliveryType]
+
+    UpdateOrderBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, in_production, ready, delivered, cancelled]
+        notes:
+          type: string
+
+    # Inventory
+    InventoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productName:
+          type: string
+        lotCode:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        entryDate:
+          type: string
+          format: date-time
+        expiryDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [available, reserved, depleted, discarded]
+      required: [id, productId, productName, lotCode, quantity, unit, entryDate, status]
+
+    InventorySummary:
+      type: object
+      properties:
+        productId:
+          type: integer
+        productName:
+          type: string
+        totalQuantity:
+          type: number
+        unit:
+          type: string
+        availableQuantity:
+          type: number
+        reservedQuantity:
+          type: number
+      required: [productId, productName, totalQuantity, unit, availableQuantity, reservedQuantity]
+
+    InventoryMovement:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [entry, exit_sale, exit_discard]
+        productId:
+          type: integer
+        productName:
+          type: string
+        lotCode:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        reason:
+          type: string
+        orderId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, type, productId, productName, lotCode, quantity, unit, createdAt]
+
+    CreateInventoryEntryBody:
+      type: object
+      properties:
+        productId:
+          type: integer
+        lotCode:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        expiryDate:
+          type: string
+          format: date
+      required: [productId, lotCode, quantity, unit]
+
+    CreateInventoryExitBody:
+      type: object
+      properties:
+        inventoryItemId:
+          type: integer
+        quantity:
+          type: number
+        type:
+          type: string
+          enum: [exit_sale, exit_discard]
+        reason:
+          type: string
+        orderId:
+          type: integer
+      required: [inventoryItemId, quantity, type]
+
+    # Production
+    ProductionLot:
+      type: object
+      properties:
+        id:
+          type: integer
+        lotCode:
+          type: string
+        productId:
+          type: integer
+        productName:
+          type: string
+        orderId:
+          type: integer
+        rawMaterialId:
+          type: integer
+        quantityProduced:
+          type: number
+        unit:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_production, finished, quality_approved, quality_rejected]
+        qualityStatus:
+          type: string
+          enum: [pending, approved, rejected]
+        brixLevel:
+          type: number
+        temperature:
+          type: number
+        qualityNotes:
+          type: string
+        producedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, lotCode, productId, productName, quantityProduced, unit, status, qualityStatus, createdAt]
+
+    CreateProductionLotBody:
+      type: object
+      properties:
+        productId:
+          type: integer
+        orderId:
+          type: integer
+        rawMaterialId:
+          type: integer
+        quantityProduced:
+          type: number
+        unit:
+          type: string
+      required: [productId, quantityProduced, unit]
+
+    UpdateProductionLotBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, in_production, finished, quality_approved, quality_rejected]
+        qualityStatus:
+          type: string
+          enum: [pending, approved, rejected]
+        brixLevel:
+          type: number
+        temperature:
+          type: number
+        qualityNotes:
+          type: string
+
+    ProductionStats:
+      type: object
+      properties:
+        todayProduced:
+          type: number
+        weekProduced:
+          type: number
+        monthProduced:
+          type: number
+        approvalRate:
+          type: number
+        rejectionRate:
+          type: number
+        averageBrix:
+          type: number
+        lotsInProduction:
+          type: integer
+        lotsFinished:
+          type: integer
+      required:
+        - todayProduced
+        - weekProduced
+        - monthProduced
+        - approvalRate
+        - rejectionRate
+        - averageBrix
+        - lotsInProduction
+        - lotsFinished
+
+    # Raw Material
+    RawMaterial:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        supplier:
+          type: string
+        quantityKg:
+          type: number
+        pricePerKg:
+          type: number
+        origin:
+          type: string
+        quality:
+          type: string
+          enum: [premium, standard, economy]
+        entryDate:
+          type: string
+          format: date-time
+        brixLevel:
+          type: number
+        notes:
+          type: string
+      required: [id, name, supplier, quantityKg, pricePerKg, entryDate, quality]
+
+    CreateRawMaterialBody:
+      type: object
+      properties:
+        name:
+          type: string
+        supplier:
+          type: string
+        quantityKg:
+          type: number
+        pricePerKg:
+          type: number
+        origin:
+          type: string
+        quality:
+          type: string
+          enum: [premium, standard, economy]
+        brixLevel:
+          type: number
+        notes:
+          type: string
+      required: [name, supplier, quantityKg, pricePerKg, quality]
+
+    # Traceability
+    TraceabilityLot:
+      type: object
+      properties:
+        lotCode:
+          type: string
+        productName:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [lotCode, productName, status, createdAt]
+
+    LotTraceability:
+      type: object
+      properties:
+        lotCode:
+          type: string
+        productName:
+          type: string
+        currentStatus:
+          type: string
+        timeline:
+          type: array
+          items:
+            $ref: "#/components/schemas/TraceabilityEvent"
+        rawMaterial:
+          $ref: "#/components/schemas/RawMaterial"
+        productionLot:
+          $ref: "#/components/schemas/ProductionLot"
+        order:
+          $ref: "#/components/schemas/Order"
+        delivery:
+          $ref: "#/components/schemas/Delivery"
+      required: [lotCode, productName, currentStatus, timeline]
+
+    TraceabilityEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        stage:
+          type: string
+          enum: [raw_material, production, quality_control, inventory, delivery]
+        event:
+          type: string
+        description:
+          type: string
+        actor:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+      required: [id, stage, event, description, timestamp]
+
+    # Delivery
+    Delivery:
+      type: object
+      properties:
+        id:
+          type: integer
+        orderId:
+          type: integer
+        orderNumber:
+          type: string
+        customerName:
+          type: string
+        deliveryAddress:
+          type: string
+        delivererId:
+          type: integer
+        delivererName:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_transit, delivered, failed]
+        scheduledAt:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, orderId, orderNumber, customerName, status, createdAt]
+
+    CreateDeliveryBody:
+      type: object
+      properties:
+        orderId:
+          type: integer
+        delivererId:
+          type: integer
+        scheduledAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+      required: [orderId]
+
+    UpdateDeliveryBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, in_transit, delivered, failed]
+        delivererId:
+          type: integer
+        scheduledAt:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+
+    DelivererStats:
+      type: object
+      properties:
+        delivererId:
+          type: integer
+        delivererName:
+          type: string
+        totalDeliveries:
+          type: integer
+        completedDeliveries:
+          type: integer
+        pendingDeliveries:
+          type: integer
+        successRate:
+          type: number
+      required: [delivererId, delivererName, totalDeliveries, completedDeliveries, pendingDeliveries, successRate]
+
+    # Reports
+    ProductionReport:
+      type: object
+      properties:
+        totalProduced:
+          type: number
+        totalLots:
+          type: integer
+        approvedLots:
+          type: integer
+        rejectedLots:
+          type: integer
+        averageBrix:
+          type: number
+        byProduct:
+          type: array
+          items:
+            type: object
+            properties:
+              productName:
+                type: string
+              quantity:
+                type: number
+              unit:
+                type: string
+            required: [productName, quantity, unit]
+        dailyBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionChartPoint"
+      required: [totalProduced, totalLots, approvedLots, rejectedLots, averageBrix, byProduct, dailyBreakdown]
+
+    FinancialReport:
+      type: object
+      properties:
+        totalRevenue:
+          type: number
+        totalOrders:
+          type: integer
+        averageOrderValue:
+          type: number
+        byPaymentType:
+          type: array
+          items:
+            type: object
+            properties:
+              paymentType:
+                type: string
+              total:
+                type: number
+              count:
+                type: integer
+            required: [paymentType, total, count]
+        topCustomers:
+          type: array
+          items:
+            type: object
+            properties:
+              customerName:
+                type: string
+              totalSpent:
+                type: number
+            required: [customerName, totalSpent]
+      required: [totalRevenue, totalOrders, averageOrderValue, byPaymentType, topCustomers]
+
+    QualityReport:
+      type: object
+      properties:
+        totalLotsTested:
+          type: integer
+        approvedLots:
+          type: integer
+        rejectedLots:
+          type: integer
+        approvalRate:
+          type: number
+        averageBrix:
+          type: number
+        averageTemperature:
+          type: number
+        rejectionReasons:
+          type: array
+          items:
+            type: object
+            properties:
+              reason:
+                type: string
+              count:
+                type: integer
+            required: [reason, count]
+      required:
+        - totalLotsTested
+        - approvedLots
+        - rejectedLots
+        - approvalRate
+        - averageBrix
+        - averageTemperature
+        - rejectionReasons
+
+    DiscardReport:
+      type: object
+      properties:
+        totalDiscardedKg:
+          type: number
+        totalMovements:
+          type: integer
+        byReason:
+          type: array
+          items:
+            type: object
+            properties:
+              reason:
+                type: string
+              quantityKg:
+                type: number
+              count:
+                type: integer
+            required: [reason, quantityKg, count]
+      required: [totalDiscardedKg, totalMovements, byReason]
