@@ -51,13 +51,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         collapsed ? "justify-center px-0" : "justify-between px-5"
       )}>
         {!collapsed && (
-          <div className="flex flex-col leading-tight overflow-hidden">
-            <span className="text-primary font-bold text-lg tracking-tight flex items-center gap-1.5">
-              <Citrus className="w-5 h-5 text-primary fill-primary/20 shrink-0" />
-              FS Frutas
-            </span>
-            <span className="text-[10px] text-muted-foreground font-medium tracking-tight truncate pl-[26px]">
-              FS Laranja e Frutas Verde
+          <div className="flex items-center gap-1.5 overflow-hidden">
+            <Citrus className="w-5 h-5 text-primary fill-primary/20 shrink-0" />
+            <span className="font-bold text-lg tracking-tight">
+              <span className="text-primary">FS</span>
+              <span className="text-[#2E7D32]"> Frutas</span>
             </span>
           </div>
         )}
