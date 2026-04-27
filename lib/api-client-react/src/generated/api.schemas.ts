@@ -441,6 +441,15 @@ export const ProductionLotQualityStatus = {
   rejected: "rejected",
 } as const;
 
+export type ProductionLotShift =
+  (typeof ProductionLotShift)[keyof typeof ProductionLotShift];
+
+export const ProductionLotShift = {
+  morning: "morning",
+  afternoon: "afternoon",
+  night: "night",
+} as const;
+
 export interface ProductionLot {
   id: number;
   lotCode: string;
@@ -455,6 +464,9 @@ export interface ProductionLot {
   brixLevel?: number;
   temperature?: number;
   qualityNotes?: string;
+  shift?: ProductionLotShift;
+  responsible?: string;
+  expiresAt?: string;
   producedAt?: string;
   createdAt: string;
 }
@@ -515,6 +527,15 @@ export const RawMaterialQuality = {
   economy: "economy",
 } as const;
 
+export type RawMaterialStatus =
+  (typeof RawMaterialStatus)[keyof typeof RawMaterialStatus];
+
+export const RawMaterialStatus = {
+  pending: "pending",
+  received: "received",
+  rejected: "rejected",
+} as const;
+
 export interface RawMaterial {
   id: number;
   name: string;
@@ -526,6 +547,9 @@ export interface RawMaterial {
   entryDate: string;
   brixLevel?: number;
   notes?: string;
+  invoiceNumber?: string;
+  responsible?: string;
+  status?: RawMaterialStatus;
 }
 
 export type CreateRawMaterialBodyQuality =

@@ -1,14 +1,16 @@
+import { useState, useMemo } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useListProductionLots, ProductionLotStatus, useGetProductionStats } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter, Factory, CheckCircle2, AlertTriangle, Clock } from "lucide-react";
+import { Plus, Search, Factory, CheckCircle2, AlertTriangle, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const lotStatusLabel: Record<string, string> = {
   pending: 'Pendente',
@@ -24,9 +26,32 @@ const qualityStatusLabel: Record<string, string> = {
   rejected: 'Reprovado',
 };
 
+const shiftLabel: Record<string, string> = {
+  morning: 'Manhã',
+  afternoon: 'Tarde',
+  night: 'Noite',
+};
+
+const ALL = "__all__";
+
 export default function Production() {
   const { data: lots, isLoading } = useListProductionLots();
   const { data: stats, isLoading: isLoadingStats } = useGetProductionStats();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>(ALL);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return (lots ?? []).filter(lot => {
+      if (statusFilter !== ALL && lot.status !== statusFilter) return false;
+      if (!q) return true;
+      return (
+        lot.lotCode.toLowerCase().includes(q) ||
+        (lot.productName ?? "").toLowerCase().includes(q) ||
+        (lot.responsible ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [lots, search, statusFilter]);
 
   const getStatusColor = (status: ProductionLotStatus) => {
     switch (status) {
@@ -41,8 +66,8 @@ export default function Production() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <PageHeader 
-        title="Produção" 
+      <PageHeader
+        title="Produção"
         description="Gerencie lotes de produção e controle de qualidade."
         actions={
           <Button className="gap-2">
@@ -51,9 +76,9 @@ export default function Production() {
           </Button>
         }
       />
-      
+
       <div className="p-6 sm:p-8 flex-1 overflow-y-auto space-y-6">
-        
+
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="shadow-sm border-border/50">
@@ -105,14 +130,38 @@ export default function Production() {
         </div>
 
         <Card className="shadow-sm border-border/50">
-          <div className="p-4 border-b flex items-center gap-4 bg-muted/20">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Buscar lotes..." className="pl-9 bg-background" />
+          <div className="p-4 border-b flex flex-col sm:flex-row sm:items-center gap-3 bg-muted/20">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                <Factory className="w-3.5 h-3.5" />
+              </div>
+              Lotes de produção
             </div>
-            <Button variant="outline" size="icon" className="shrink-0 bg-background">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            <div className="flex flex-1 items-center gap-3 sm:justify-end">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Buscar por lote, produto ou responsável..."
+                  className="pl-9 bg-background"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[180px] bg-background">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL}>Todos os status</SelectItem>
+                  <SelectItem value="pending">Pendente</SelectItem>
+                  <SelectItem value="in_production">Em Produção</SelectItem>
+                  <SelectItem value="finished">Finalizado</SelectItem>
+                  <SelectItem value="quality_approved">Aprovado</SelectItem>
+                  <SelectItem value="quality_rejected">Reprovado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <Table>
             <TableHeader>
@@ -120,6 +169,8 @@ export default function Production() {
                 <TableHead>Código do Lote</TableHead>
                 <TableHead>Produto</TableHead>
                 <TableHead>Quantidade</TableHead>
+                <TableHead>Turno</TableHead>
+                <TableHead>Responsável</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Qualidade</TableHead>
                 <TableHead>Data</TableHead>
@@ -132,17 +183,21 @@ export default function Production() {
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   </TableRow>
                 ))
-              ) : lots?.length ? (
-                lots.map((lot) => (
+              ) : filtered.length ? (
+                filtered.map((lot) => (
                   <TableRow key={lot.id} className="cursor-pointer hover:bg-muted/50">
                     <TableCell className="font-medium text-primary">{lot.lotCode}</TableCell>
                     <TableCell>{lot.productName}</TableCell>
                     <TableCell>{lot.quantityProduced} {lot.unit}</TableCell>
+                    <TableCell>{lot.shift ? shiftLabel[lot.shift] : <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="text-sm">{lot.responsible || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={getStatusColor(lot.status)}>
                         {lotStatusLabel[lot.status] || lot.status}
@@ -164,7 +219,7 @@ export default function Production() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                     Nenhum lote de produção encontrado.
                   </TableCell>
                 </TableRow>

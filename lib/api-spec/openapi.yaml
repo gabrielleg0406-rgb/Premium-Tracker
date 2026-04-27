@@ -1470,6 +1470,14 @@ components:
           type: number
         qualityNotes:
           type: string
+        shift:
+          type: string
+          enum: [morning, afternoon, night]
+        responsible:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
         producedAt:
           type: string
           format: date-time
@@ -1564,6 +1572,13 @@ components:
           type: number
         notes:
           type: string
+        invoiceNumber:
+          type: string
+        responsible:
+          type: string
+        status:
+          type: string
+          enum: [pending, received, rejected]
       required: [id, name, supplier, quantityKg, pricePerKg, entryDate, quality]
 
     CreateRawMaterialBody:

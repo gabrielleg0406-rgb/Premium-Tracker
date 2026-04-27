@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useListOrders, OrderStatus } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
@@ -7,9 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, ShoppingCart } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const statusLabel: Record<string, string> = {
   pending: 'Pendente',
@@ -19,15 +20,28 @@ const statusLabel: Record<string, string> = {
   cancelled: 'Cancelado',
 };
 
+const ALL = "__all__";
+
 export default function Orders() {
-  const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  
+  const [page] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<string>(ALL);
+  const [search, setSearch] = useState("");
+
   const { data: orderList, isLoading } = useListOrders({
     page,
-    limit: 10,
-    ...(statusFilter && { status: statusFilter as any })
+    limit: 50,
+    ...(statusFilter !== ALL && { status: statusFilter as any })
   });
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return orderList?.data ?? [];
+    return (orderList?.data ?? []).filter(o =>
+      o.orderNumber.toLowerCase().includes(q) ||
+      (o.customerName ?? "").toLowerCase().includes(q) ||
+      (o.productName ?? "").toLowerCase().includes(q)
+    );
+  }, [orderList, search]);
 
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
@@ -42,8 +56,8 @@ export default function Orders() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <PageHeader 
-        title="Pedidos" 
+      <PageHeader
+        title="Pedidos"
         description="Gerencie pedidos de clientes e acompanhe o status de execução."
         actions={
           <Button className="gap-2">
@@ -52,17 +66,41 @@ export default function Orders() {
           </Button>
         }
       />
-      
-      <div className="p-6 sm:p-8 flex-1 overflow-y-auto">
+
+      <div className="p-6 sm:p-8 flex-1 overflow-y-auto space-y-6">
         <Card className="shadow-sm border-border/50">
-          <div className="p-4 border-b flex items-center gap-4 bg-muted/20">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Buscar pedidos..." className="pl-9 bg-background" />
+          <div className="p-4 border-b flex flex-col sm:flex-row sm:items-center gap-3 bg-muted/20">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                <ShoppingCart className="w-3.5 h-3.5" />
+              </div>
+              Lista de pedidos
             </div>
-            <Button variant="outline" size="icon" className="shrink-0 bg-background">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            <div className="flex flex-1 items-center gap-3 sm:justify-end">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Buscar por nº, cliente ou produto..."
+                  className="pl-9 bg-background"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[180px] bg-background">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL}>Todos os status</SelectItem>
+                  <SelectItem value="pending">Pendente</SelectItem>
+                  <SelectItem value="in_production">Em Produção</SelectItem>
+                  <SelectItem value="ready">Pronto</SelectItem>
+                  <SelectItem value="delivered">Entregue</SelectItem>
+                  <SelectItem value="cancelled">Cancelado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <Table>
             <TableHeader>
@@ -87,8 +125,8 @@ export default function Orders() {
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   </TableRow>
                 ))
-              ) : orderList?.data?.length ? (
-                orderList.data.map((order) => (
+              ) : filtered.length ? (
+                filtered.map((order) => (
                   <TableRow key={order.id} className="cursor-pointer hover:bg-muted/50">
                     <TableCell className="font-medium">{order.orderNumber}</TableCell>
                     <TableCell>{order.customerName}</TableCell>

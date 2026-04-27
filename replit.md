@@ -47,5 +47,6 @@ A premium SaaS-style management system for orange production and distribution co
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
+- `pnpm --filter @workspace/scripts run seed` — populate the database with realistic demo data (idempotent: clears + reseeds)
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.

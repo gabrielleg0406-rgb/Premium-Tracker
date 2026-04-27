@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ProductionLotQualityStatus } from "./productionLotQualityStatus";
+import type { ProductionLotShift } from "./productionLotShift";
 import type { ProductionLotStatus } from "./productionLotStatus";
 
 export interface ProductionLot {
@@ -22,6 +23,9 @@ export interface ProductionLot {
   brixLevel?: number;
   temperature?: number;
   qualityNotes?: string;
+  shift?: ProductionLotShift;
+  responsible?: string;
+  expiresAt?: Date;
   producedAt?: Date;
   createdAt: Date;
 }

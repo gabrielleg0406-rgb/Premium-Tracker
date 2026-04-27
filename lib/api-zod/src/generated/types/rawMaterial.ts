@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { RawMaterialQuality } from "./rawMaterialQuality";
+import type { RawMaterialStatus } from "./rawMaterialStatus";
 
 export interface RawMaterial {
   id: number;
@@ -18,4 +19,7 @@ export interface RawMaterial {
   entryDate: Date;
   brixLevel?: number;
   notes?: string;
+  invoiceNumber?: string;
+  responsible?: string;
+  status?: RawMaterialStatus;
 }

@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useListDeliveries, DeliveryStatus } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
@@ -6,9 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Truck } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const statusLabel: Record<string, string> = {
   pending: 'Pendente',
@@ -17,8 +19,25 @@ const statusLabel: Record<string, string> = {
   failed: 'Falhou',
 };
 
+const ALL = "__all__";
+
 export default function Deliveries() {
-  const { data: deliveries, isLoading } = useListDeliveries();
+  const [statusFilter, setStatusFilter] = useState<string>(ALL);
+  const [search, setSearch] = useState("");
+
+  const { data: deliveries, isLoading } = useListDeliveries(
+    statusFilter !== ALL ? { status: statusFilter as any } : undefined
+  );
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return deliveries ?? [];
+    return (deliveries ?? []).filter(d =>
+      (d.orderNumber ?? "").toLowerCase().includes(q) ||
+      (d.customerName ?? "").toLowerCase().includes(q) ||
+      (d.delivererName ?? "").toLowerCase().includes(q)
+    );
+  }, [deliveries, search]);
 
   const getStatusColor = (status: DeliveryStatus) => {
     switch (status) {
@@ -32,8 +51,8 @@ export default function Deliveries() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <PageHeader 
-        title="Entregas" 
+      <PageHeader
+        title="Entregas"
         description="Gerencie logística e atribuições de entrega."
         actions={
           <Button className="gap-2">
@@ -42,17 +61,40 @@ export default function Deliveries() {
           </Button>
         }
       />
-      
+
       <div className="p-6 sm:p-8 flex-1 overflow-y-auto">
         <Card className="shadow-sm border-border/50">
-          <div className="p-4 border-b flex items-center gap-4 bg-muted/20">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Buscar por pedido ou motorista..." className="pl-9 bg-background" />
+          <div className="p-4 border-b flex flex-col sm:flex-row sm:items-center gap-3 bg-muted/20">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                <Truck className="w-3.5 h-3.5" />
+              </div>
+              Lista de entregas
             </div>
-            <Button variant="outline" size="icon" className="shrink-0 bg-background">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            <div className="flex flex-1 items-center gap-3 sm:justify-end">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Buscar por pedido, cliente ou motorista..."
+                  className="pl-9 bg-background"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[180px] bg-background">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL}>Todos os status</SelectItem>
+                  <SelectItem value="pending">Pendente</SelectItem>
+                  <SelectItem value="in_transit">Em Trânsito</SelectItem>
+                  <SelectItem value="delivered">Entregue</SelectItem>
+                  <SelectItem value="failed">Falhou</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <Table>
             <TableHeader>
@@ -77,8 +119,8 @@ export default function Deliveries() {
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   </TableRow>
                 ))
-              ) : deliveries?.length ? (
-                deliveries.map((delivery) => (
+              ) : filtered.length ? (
+                filtered.map((delivery) => (
                   <TableRow key={delivery.id} className="cursor-pointer hover:bg-muted/50">
                     <TableCell className="font-medium text-primary">{delivery.orderNumber}</TableCell>
                     <TableCell>

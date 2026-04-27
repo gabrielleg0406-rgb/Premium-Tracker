@@ -640,6 +640,9 @@ export const ListProductionLotsResponseItem = zod.object({
   brixLevel: zod.number().optional(),
   temperature: zod.number().optional(),
   qualityNotes: zod.string().optional(),
+  shift: zod.enum(["morning", "afternoon", "night"]).optional(),
+  responsible: zod.string().optional(),
+  expiresAt: zod.coerce.date().optional(),
   producedAt: zod.coerce.date().optional(),
   createdAt: zod.coerce.date(),
 });
@@ -685,6 +688,9 @@ export const GetProductionLotResponse = zod.object({
   brixLevel: zod.number().optional(),
   temperature: zod.number().optional(),
   qualityNotes: zod.string().optional(),
+  shift: zod.enum(["morning", "afternoon", "night"]).optional(),
+  responsible: zod.string().optional(),
+  expiresAt: zod.coerce.date().optional(),
   producedAt: zod.coerce.date().optional(),
   createdAt: zod.coerce.date(),
 });
@@ -732,6 +738,9 @@ export const UpdateProductionLotResponse = zod.object({
   brixLevel: zod.number().optional(),
   temperature: zod.number().optional(),
   qualityNotes: zod.string().optional(),
+  shift: zod.enum(["morning", "afternoon", "night"]).optional(),
+  responsible: zod.string().optional(),
+  expiresAt: zod.coerce.date().optional(),
   producedAt: zod.coerce.date().optional(),
   createdAt: zod.coerce.date(),
 });
@@ -764,6 +773,9 @@ export const ListRawMaterialsResponseItem = zod.object({
   entryDate: zod.coerce.date(),
   brixLevel: zod.number().optional(),
   notes: zod.string().optional(),
+  invoiceNumber: zod.string().optional(),
+  responsible: zod.string().optional(),
+  status: zod.enum(["pending", "received", "rejected"]).optional(),
 });
 export const ListRawMaterialsResponse = zod.array(ListRawMaterialsResponseItem);
 
@@ -834,6 +846,9 @@ export const GetTraceabilityLotResponse = zod.object({
       entryDate: zod.coerce.date(),
       brixLevel: zod.number().optional(),
       notes: zod.string().optional(),
+      invoiceNumber: zod.string().optional(),
+      responsible: zod.string().optional(),
+      status: zod.enum(["pending", "received", "rejected"]).optional(),
     })
     .optional(),
   productionLot: zod
@@ -857,6 +872,9 @@ export const GetTraceabilityLotResponse = zod.object({
       brixLevel: zod.number().optional(),
       temperature: zod.number().optional(),
       qualityNotes: zod.string().optional(),
+      shift: zod.enum(["morning", "afternoon", "night"]).optional(),
+      responsible: zod.string().optional(),
+      expiresAt: zod.coerce.date().optional(),
       producedAt: zod.coerce.date().optional(),
       createdAt: zod.coerce.date(),
     })
