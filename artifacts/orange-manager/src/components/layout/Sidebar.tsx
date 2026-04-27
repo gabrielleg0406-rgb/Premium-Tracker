@@ -13,12 +13,14 @@ import {
   Settings,
   LogOut,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const mainNavItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/pos", label: "Caixa", icon: Wallet },
   { href: "/orders", label: "Pedidos", icon: ShoppingCart },
   { href: "/customers", label: "Clientes", icon: Users },
   { href: "/products", label: "Produtos", icon: Boxes },

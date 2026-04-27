@@ -193,7 +193,10 @@ export const GetCustomerOrdersResponseItem = zod.object({
   quantity: zod.number(),
   unit: zod.string(),
   totalPrice: zod.number(),
-  paymentType: zod.enum(["cash", "credit", "pix", "invoice"]),
+  paymentType: zod.enum(["cash", "card", "pix", "promissory"]),
+  paymentStatus: zod.enum(["pending", "paid", "partial"]),
+  amountPaid: zod.number(),
+  fulfillmentSource: zod.enum(["stock", "production"]),
   status: zod.enum([
     "pending",
     "in_production",
@@ -202,8 +205,9 @@ export const GetCustomerOrdersResponseItem = zod.object({
     "cancelled",
   ]),
   deliveryType: zod.enum(["delivery", "pickup"]),
-  deliveryAddress: zod.string().optional(),
-  notes: zod.string().optional(),
+  deliveryAddress: zod.string().nullish(),
+  scheduledAt: zod.coerce.date().nullish(),
+  notes: zod.string().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
@@ -294,7 +298,10 @@ export const ListOrdersResponse = zod.object({
       quantity: zod.number(),
       unit: zod.string(),
       totalPrice: zod.number(),
-      paymentType: zod.enum(["cash", "credit", "pix", "invoice"]),
+      paymentType: zod.enum(["cash", "card", "pix", "promissory"]),
+      paymentStatus: zod.enum(["pending", "paid", "partial"]),
+      amountPaid: zod.number(),
+      fulfillmentSource: zod.enum(["stock", "production"]),
       status: zod.enum([
         "pending",
         "in_production",
@@ -303,8 +310,9 @@ export const ListOrdersResponse = zod.object({
         "cancelled",
       ]),
       deliveryType: zod.enum(["delivery", "pickup"]),
-      deliveryAddress: zod.string().optional(),
-      notes: zod.string().optional(),
+      deliveryAddress: zod.string().nullish(),
+      scheduledAt: zod.coerce.date().nullish(),
+      notes: zod.string().nullish(),
       createdAt: zod.coerce.date(),
       updatedAt: zod.coerce.date(),
     }),
@@ -321,7 +329,7 @@ export const CreateOrderBody = zod.object({
   customerId: zod.number(),
   productId: zod.number(),
   quantity: zod.number(),
-  paymentType: zod.enum(["cash", "credit", "pix", "invoice"]),
+  paymentType: zod.enum(["cash", "card", "pix", "promissory"]),
   deliveryType: zod.enum(["delivery", "pickup"]),
   deliveryAddress: zod.string().optional(),
   notes: zod.string().optional(),
@@ -344,7 +352,10 @@ export const GetOrderResponse = zod.object({
   quantity: zod.number(),
   unit: zod.string(),
   totalPrice: zod.number(),
-  paymentType: zod.enum(["cash", "credit", "pix", "invoice"]),
+  paymentType: zod.enum(["cash", "card", "pix", "promissory"]),
+  paymentStatus: zod.enum(["pending", "paid", "partial"]),
+  amountPaid: zod.number(),
+  fulfillmentSource: zod.enum(["stock", "production"]),
   status: zod.enum([
     "pending",
     "in_production",
@@ -353,8 +364,9 @@ export const GetOrderResponse = zod.object({
     "cancelled",
   ]),
   deliveryType: zod.enum(["delivery", "pickup"]),
-  deliveryAddress: zod.string().optional(),
-  notes: zod.string().optional(),
+  deliveryAddress: zod.string().nullish(),
+  scheduledAt: zod.coerce.date().nullish(),
+  notes: zod.string().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
@@ -383,7 +395,10 @@ export const UpdateOrderResponse = zod.object({
   quantity: zod.number(),
   unit: zod.string(),
   totalPrice: zod.number(),
-  paymentType: zod.enum(["cash", "credit", "pix", "invoice"]),
+  paymentType: zod.enum(["cash", "card", "pix", "promissory"]),
+  paymentStatus: zod.enum(["pending", "paid", "partial"]),
+  amountPaid: zod.number(),
+  fulfillmentSource: zod.enum(["stock", "production"]),
   status: zod.enum([
     "pending",
     "in_production",
@@ -392,10 +407,130 @@ export const UpdateOrderResponse = zod.object({
     "cancelled",
   ]),
   deliveryType: zod.enum(["delivery", "pickup"]),
-  deliveryAddress: zod.string().optional(),
-  notes: zod.string().optional(),
+  deliveryAddress: zod.string().nullish(),
+  scheduledAt: zod.coerce.date().nullish(),
+  notes: zod.string().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Create an order from the POS / cash register
+ */
+export const CreatePosOrderBody = zod.object({
+  customerId: zod.number(),
+  productId: zod.number(),
+  quantity: zod.number(),
+  paymentType: zod.enum(["cash", "card", "pix", "promissory"]),
+  amountPaid: zod
+    .number()
+    .optional()
+    .describe("Amount actually received at the cash register. Defaults to 0."),
+  fulfillmentSource: zod
+    .enum(["stock", "production"])
+    .describe("Take from stock or send to production"),
+  deliveryType: zod.enum(["delivery", "pickup"]),
+  deliveryAddress: zod.string().optional(),
+  scheduledAt: zod.coerce
+    .date()
+    .optional()
+    .describe("For deliveries, the scheduled delivery date\/time"),
+  notes: zod.string().optional(),
+});
+
+/**
+ * @summary Register a payment received for an order
+ */
+export const RegisterOrderPaymentParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const RegisterOrderPaymentBody = zod.object({
+  amountPaid: zod.number(),
+  paymentType: zod.enum(["cash", "card", "pix", "promissory"]).optional(),
+});
+
+export const RegisterOrderPaymentResponse = zod.object({
+  id: zod.number(),
+  orderNumber: zod.string(),
+  customerId: zod.number(),
+  customerName: zod.string(),
+  productId: zod.number(),
+  productName: zod.string(),
+  quantity: zod.number(),
+  unit: zod.string(),
+  totalPrice: zod.number(),
+  paymentType: zod.enum(["cash", "card", "pix", "promissory"]),
+  paymentStatus: zod.enum(["pending", "paid", "partial"]),
+  amountPaid: zod.number(),
+  fulfillmentSource: zod.enum(["stock", "production"]),
+  status: zod.enum([
+    "pending",
+    "in_production",
+    "ready",
+    "delivered",
+    "cancelled",
+  ]),
+  deliveryType: zod.enum(["delivery", "pickup"]),
+  deliveryAddress: zod.string().nullish(),
+  scheduledAt: zod.coerce.date().nullish(),
+  notes: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Get cash register summary for a given day
+ */
+export const GetCashRegisterSummaryQueryParams = zod.object({
+  date: zod.coerce
+    .string()
+    .optional()
+    .describe("Date in YYYY-MM-DD format. Defaults to today."),
+});
+
+export const GetCashRegisterSummaryResponse = zod.object({
+  date: zod.string(),
+  totalReceived: zod.number(),
+  totalPending: zod.number(),
+  ordersOpen: zod.number(),
+  ordersCompleted: zod.number(),
+  receivedByMethod: zod.object({
+    cash: zod.number(),
+    card: zod.number(),
+    pix: zod.number(),
+    promissory: zod.number(),
+  }),
+  recentOrders: zod.array(
+    zod.object({
+      id: zod.number(),
+      orderNumber: zod.string(),
+      customerId: zod.number(),
+      customerName: zod.string(),
+      productId: zod.number(),
+      productName: zod.string(),
+      quantity: zod.number(),
+      unit: zod.string(),
+      totalPrice: zod.number(),
+      paymentType: zod.enum(["cash", "card", "pix", "promissory"]),
+      paymentStatus: zod.enum(["pending", "paid", "partial"]),
+      amountPaid: zod.number(),
+      fulfillmentSource: zod.enum(["stock", "production"]),
+      status: zod.enum([
+        "pending",
+        "in_production",
+        "ready",
+        "delivered",
+        "cancelled",
+      ]),
+      deliveryType: zod.enum(["delivery", "pickup"]),
+      deliveryAddress: zod.string().nullish(),
+      scheduledAt: zod.coerce.date().nullish(),
+      notes: zod.string().nullish(),
+      createdAt: zod.coerce.date(),
+      updatedAt: zod.coerce.date(),
+    }),
+  ),
 });
 
 /**
@@ -737,7 +872,10 @@ export const GetTraceabilityLotResponse = zod.object({
       quantity: zod.number(),
       unit: zod.string(),
       totalPrice: zod.number(),
-      paymentType: zod.enum(["cash", "credit", "pix", "invoice"]),
+      paymentType: zod.enum(["cash", "card", "pix", "promissory"]),
+      paymentStatus: zod.enum(["pending", "paid", "partial"]),
+      amountPaid: zod.number(),
+      fulfillmentSource: zod.enum(["stock", "production"]),
       status: zod.enum([
         "pending",
         "in_production",
@@ -746,8 +884,9 @@ export const GetTraceabilityLotResponse = zod.object({
         "cancelled",
       ]),
       deliveryType: zod.enum(["delivery", "pickup"]),
-      deliveryAddress: zod.string().optional(),
-      notes: zod.string().optional(),
+      deliveryAddress: zod.string().nullish(),
+      scheduledAt: zod.coerce.date().nullish(),
+      notes: zod.string().nullish(),
       createdAt: zod.coerce.date(),
       updatedAt: zod.coerce.date(),
     })

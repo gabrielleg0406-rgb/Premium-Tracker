@@ -17,11 +17,13 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  CashRegisterSummary,
   CreateCustomerBody,
   CreateDeliveryBody,
   CreateInventoryEntryBody,
   CreateInventoryExitBody,
   CreateOrderBody,
+  CreatePosOrderBody,
   CreateProductBody,
   CreateProductionLotBody,
   CreateRawMaterialBody,
@@ -32,6 +34,7 @@ import type {
   Delivery,
   DiscardReport,
   FinancialReport,
+  GetCashRegisterSummaryParams,
   GetDiscardReportParams,
   GetFinancialReportParams,
   GetProductionReportParams,
@@ -56,6 +59,7 @@ import type {
   QualityAlert,
   QualityReport,
   RawMaterial,
+  RegisterPaymentBody,
   TraceabilityLot,
   UpdateDeliveryBody,
   UpdateOrderBody,
@@ -1665,6 +1669,282 @@ export const useUpdateOrder = <
 > => {
   return useMutation(getUpdateOrderMutationOptions(options));
 };
+
+/**
+ * @summary Create an order from the POS / cash register
+ */
+export const getCreatePosOrderUrl = () => {
+  return `/api/orders/pos`;
+};
+
+export const createPosOrder = async (
+  createPosOrderBody: CreatePosOrderBody,
+  options?: RequestInit,
+): Promise<Order> => {
+  return customFetch<Order>(getCreatePosOrderUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createPosOrderBody),
+  });
+};
+
+export const getCreatePosOrderMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createPosOrder>>,
+    TError,
+    { data: BodyType<CreatePosOrderBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createPosOrder>>,
+  TError,
+  { data: BodyType<CreatePosOrderBody> },
+  TContext
+> => {
+  const mutationKey = ["createPosOrder"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createPosOrder>>,
+    { data: BodyType<CreatePosOrderBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createPosOrder(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreatePosOrderMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createPosOrder>>
+>;
+export type CreatePosOrderMutationBody = BodyType<CreatePosOrderBody>;
+export type CreatePosOrderMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create an order from the POS / cash register
+ */
+export const useCreatePosOrder = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createPosOrder>>,
+    TError,
+    { data: BodyType<CreatePosOrderBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createPosOrder>>,
+  TError,
+  { data: BodyType<CreatePosOrderBody> },
+  TContext
+> => {
+  return useMutation(getCreatePosOrderMutationOptions(options));
+};
+
+/**
+ * @summary Register a payment received for an order
+ */
+export const getRegisterOrderPaymentUrl = (id: number) => {
+  return `/api/orders/${id}/payment`;
+};
+
+export const registerOrderPayment = async (
+  id: number,
+  registerPaymentBody: RegisterPaymentBody,
+  options?: RequestInit,
+): Promise<Order> => {
+  return customFetch<Order>(getRegisterOrderPaymentUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(registerPaymentBody),
+  });
+};
+
+export const getRegisterOrderPaymentMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof registerOrderPayment>>,
+    TError,
+    { id: number; data: BodyType<RegisterPaymentBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof registerOrderPayment>>,
+  TError,
+  { id: number; data: BodyType<RegisterPaymentBody> },
+  TContext
+> => {
+  const mutationKey = ["registerOrderPayment"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof registerOrderPayment>>,
+    { id: number; data: BodyType<RegisterPaymentBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return registerOrderPayment(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RegisterOrderPaymentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof registerOrderPayment>>
+>;
+export type RegisterOrderPaymentMutationBody = BodyType<RegisterPaymentBody>;
+export type RegisterOrderPaymentMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Register a payment received for an order
+ */
+export const useRegisterOrderPayment = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof registerOrderPayment>>,
+    TError,
+    { id: number; data: BodyType<RegisterPaymentBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof registerOrderPayment>>,
+  TError,
+  { id: number; data: BodyType<RegisterPaymentBody> },
+  TContext
+> => {
+  return useMutation(getRegisterOrderPaymentMutationOptions(options));
+};
+
+/**
+ * @summary Get cash register summary for a given day
+ */
+export const getGetCashRegisterSummaryUrl = (
+  params?: GetCashRegisterSummaryParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/cash-register/summary?${stringifiedParams}`
+    : `/api/cash-register/summary`;
+};
+
+export const getCashRegisterSummary = async (
+  params?: GetCashRegisterSummaryParams,
+  options?: RequestInit,
+): Promise<CashRegisterSummary> => {
+  return customFetch<CashRegisterSummary>(
+    getGetCashRegisterSummaryUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetCashRegisterSummaryQueryKey = (
+  params?: GetCashRegisterSummaryParams,
+) => {
+  return [`/api/cash-register/summary`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetCashRegisterSummaryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCashRegisterSummary>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetCashRegisterSummaryParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCashRegisterSummary>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCashRegisterSummaryQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCashRegisterSummary>>
+  > = ({ signal }) =>
+    getCashRegisterSummary(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCashRegisterSummary>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCashRegisterSummaryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCashRegisterSummary>>
+>;
+export type GetCashRegisterSummaryQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get cash register summary for a given day
+ */
+
+export function useGetCashRegisterSummary<
+  TData = Awaited<ReturnType<typeof getCashRegisterSummary>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetCashRegisterSummaryParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCashRegisterSummary>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCashRegisterSummaryQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary List current inventory items

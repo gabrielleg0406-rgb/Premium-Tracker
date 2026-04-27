@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CreateOrderBodyPaymentType =
-  (typeof CreateOrderBodyPaymentType)[keyof typeof CreateOrderBodyPaymentType];
+export type CreatePosOrderBodyPaymentType =
+  (typeof CreatePosOrderBodyPaymentType)[keyof typeof CreatePosOrderBodyPaymentType];
 
-export const CreateOrderBodyPaymentType = {
+export const CreatePosOrderBodyPaymentType = {
   cash: "cash",
   card: "card",
   pix: "pix",

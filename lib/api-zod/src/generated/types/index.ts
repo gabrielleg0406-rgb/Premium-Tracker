@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./cashRegisterSummary";
+export * from "./cashRegisterSummaryReceivedByMethod";
 export * from "./createCustomerBody";
 export * from "./createDeliveryBody";
 export * from "./createInventoryEntryBody";
@@ -14,6 +16,10 @@ export * from "./createInventoryExitBodyType";
 export * from "./createOrderBody";
 export * from "./createOrderBodyDeliveryType";
 export * from "./createOrderBodyPaymentType";
+export * from "./createPosOrderBody";
+export * from "./createPosOrderBodyDeliveryType";
+export * from "./createPosOrderBodyFulfillmentSource";
+export * from "./createPosOrderBodyPaymentType";
 export * from "./createProductBody";
 export * from "./createProductBodyType";
 export * from "./createProductBodyUnit";
@@ -31,6 +37,7 @@ export * from "./discardReportByReasonItem";
 export * from "./financialReport";
 export * from "./financialReportByPaymentTypeItem";
 export * from "./financialReportTopCustomersItem";
+export * from "./getCashRegisterSummaryParams";
 export * from "./getDiscardReportParams";
 export * from "./getFinancialReportParams";
 export * from "./getProductionReportParams";
@@ -51,7 +58,9 @@ export * from "./listProductionLotsStatus";
 export * from "./lotTraceability";
 export * from "./order";
 export * from "./orderDeliveryType";
+export * from "./orderFulfillmentSource";
 export * from "./orderList";
+export * from "./orderPaymentStatus";
 export * from "./orderPaymentType";
 export * from "./orderStatus";
 export * from "./orderStatusBreakdown";
@@ -72,6 +81,8 @@ export * from "./qualityReport";
 export * from "./qualityReportRejectionReasonsItem";
 export * from "./rawMaterial";
 export * from "./rawMaterialQuality";
+export * from "./registerPaymentBody";
+export * from "./registerPaymentBodyPaymentType";
 export * from "./traceabilityEvent";
 export * from "./traceabilityEventMetadata";
 export * from "./traceabilityEventStage";

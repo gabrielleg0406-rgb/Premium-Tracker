@@ -153,9 +153,26 @@ export type OrderPaymentType =
 
 export const OrderPaymentType = {
   cash: "cash",
-  credit: "credit",
+  card: "card",
   pix: "pix",
-  invoice: "invoice",
+  promissory: "promissory",
+} as const;
+
+export type OrderPaymentStatus =
+  (typeof OrderPaymentStatus)[keyof typeof OrderPaymentStatus];
+
+export const OrderPaymentStatus = {
+  pending: "pending",
+  paid: "paid",
+  partial: "partial",
+} as const;
+
+export type OrderFulfillmentSource =
+  (typeof OrderFulfillmentSource)[keyof typeof OrderFulfillmentSource];
+
+export const OrderFulfillmentSource = {
+  stock: "stock",
+  production: "production",
 } as const;
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
@@ -187,10 +204,14 @@ export interface Order {
   unit: string;
   totalPrice: number;
   paymentType: OrderPaymentType;
+  paymentStatus: OrderPaymentStatus;
+  amountPaid: number;
+  fulfillmentSource: OrderFulfillmentSource;
   status: OrderStatus;
   deliveryType: OrderDeliveryType;
-  deliveryAddress?: string;
-  notes?: string;
+  deliveryAddress?: string | null;
+  scheduledAt?: string | null;
+  notes?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -207,9 +228,9 @@ export type CreateOrderBodyPaymentType =
 
 export const CreateOrderBodyPaymentType = {
   cash: "cash",
-  credit: "credit",
+  card: "card",
   pix: "pix",
-  invoice: "invoice",
+  promissory: "promissory",
 } as const;
 
 export type CreateOrderBodyDeliveryType =
@@ -244,6 +265,83 @@ export const UpdateOrderBodyStatus = {
 export interface UpdateOrderBody {
   status?: UpdateOrderBodyStatus;
   notes?: string;
+}
+
+export type CreatePosOrderBodyPaymentType =
+  (typeof CreatePosOrderBodyPaymentType)[keyof typeof CreatePosOrderBodyPaymentType];
+
+export const CreatePosOrderBodyPaymentType = {
+  cash: "cash",
+  card: "card",
+  pix: "pix",
+  promissory: "promissory",
+} as const;
+
+/**
+ * Take from stock or send to production
+ */
+export type CreatePosOrderBodyFulfillmentSource =
+  (typeof CreatePosOrderBodyFulfillmentSource)[keyof typeof CreatePosOrderBodyFulfillmentSource];
+
+export const CreatePosOrderBodyFulfillmentSource = {
+  stock: "stock",
+  production: "production",
+} as const;
+
+export type CreatePosOrderBodyDeliveryType =
+  (typeof CreatePosOrderBodyDeliveryType)[keyof typeof CreatePosOrderBodyDeliveryType];
+
+export const CreatePosOrderBodyDeliveryType = {
+  delivery: "delivery",
+  pickup: "pickup",
+} as const;
+
+export interface CreatePosOrderBody {
+  customerId: number;
+  productId: number;
+  quantity: number;
+  paymentType: CreatePosOrderBodyPaymentType;
+  /** Amount actually received at the cash register. Defaults to 0. */
+  amountPaid?: number;
+  /** Take from stock or send to production */
+  fulfillmentSource: CreatePosOrderBodyFulfillmentSource;
+  deliveryType: CreatePosOrderBodyDeliveryType;
+  deliveryAddress?: string;
+  /** For deliveries, the scheduled delivery date/time */
+  scheduledAt?: string;
+  notes?: string;
+}
+
+export type RegisterPaymentBodyPaymentType =
+  (typeof RegisterPaymentBodyPaymentType)[keyof typeof RegisterPaymentBodyPaymentType];
+
+export const RegisterPaymentBodyPaymentType = {
+  cash: "cash",
+  card: "card",
+  pix: "pix",
+  promissory: "promissory",
+} as const;
+
+export interface RegisterPaymentBody {
+  amountPaid: number;
+  paymentType?: RegisterPaymentBodyPaymentType;
+}
+
+export type CashRegisterSummaryReceivedByMethod = {
+  cash: number;
+  card: number;
+  pix: number;
+  promissory: number;
+};
+
+export interface CashRegisterSummary {
+  date: string;
+  totalReceived: number;
+  totalPending: number;
+  ordersOpen: number;
+  ordersCompleted: number;
+  receivedByMethod: CashRegisterSummaryReceivedByMethod;
+  recentOrders: Order[];
 }
 
 export type InventoryItemStatus =
@@ -634,6 +732,13 @@ export const ListOrdersStatus = {
   delivered: "delivered",
   cancelled: "cancelled",
 } as const;
+
+export type GetCashRegisterSummaryParams = {
+  /**
+   * Date in YYYY-MM-DD format. Defaults to today.
+   */
+  date?: string;
+};
 
 export type ListProductionLotsParams = {
   status?: ListProductionLotsStatus;

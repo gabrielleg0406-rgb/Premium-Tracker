@@ -10,6 +10,7 @@ import deliveriesRouter from "./deliveries";
 import traceabilityRouter from "./traceability";
 import dashboardRouter from "./dashboard";
 import reportsRouter from "./reports";
+import cashRegisterRouter from "./cashRegister";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use("/deliveries", deliveriesRouter);
 router.use("/traceability", traceabilityRouter);
 router.use("/dashboard", dashboardRouter);
 router.use("/reports", reportsRouter);
+router.use("/cash-register", cashRegisterRouter);
 
 export default router;

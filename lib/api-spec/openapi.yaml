@@ -384,6 +384,70 @@ paths:
               schema:
                 $ref: "#/components/schemas/Order"
 
+  /orders/pos:
+    post:
+      operationId: createPosOrder
+      tags: [orders]
+      summary: Create an order from the POS / cash register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePosOrderBody"
+      responses:
+        "201":
+          description: Created order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}/payment:
+    post:
+      operationId: registerOrderPayment
+      tags: [orders]
+      summary: Register a payment received for an order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterPaymentBody"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  # CASH REGISTER
+  /cash-register/summary:
+    get:
+      operationId: getCashRegisterSummary
+      tags: [orders]
+      summary: Get cash register summary for a given day
+      parameters:
+        - name: date
+          in: query
+          description: Date in YYYY-MM-DD format. Defaults to today.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cash register summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashRegisterSummary"
+
   # INVENTORY
   /inventory:
     get:
@@ -1031,7 +1095,15 @@ components:
           type: number
         paymentType:
           type: string
-          enum: [cash, credit, pix, invoice]
+          enum: [cash, card, pix, promissory]
+        paymentStatus:
+          type: string
+          enum: [pending, paid, partial]
+        amountPaid:
+          type: number
+        fulfillmentSource:
+          type: string
+          enum: [stock, production]
         status:
           type: string
           enum: [pending, in_production, ready, delivered, cancelled]
@@ -1040,8 +1112,14 @@ components:
           enum: [delivery, pickup]
         deliveryAddress:
           type: string
+          nullable: true
+        scheduledAt:
+          type: string
+          format: date-time
+          nullable: true
         notes:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -1059,6 +1137,9 @@ components:
         - unit
         - totalPrice
         - paymentType
+        - paymentStatus
+        - amountPaid
+        - fulfillmentSource
         - status
         - deliveryType
         - createdAt
@@ -1090,7 +1171,7 @@ components:
           type: number
         paymentType:
           type: string
-          enum: [cash, credit, pix, invoice]
+          enum: [cash, card, pix, promissory]
         deliveryType:
           type: string
           enum: [delivery, pickup]
@@ -1108,6 +1189,79 @@ components:
           enum: [pending, in_production, ready, delivered, cancelled]
         notes:
           type: string
+
+    CreatePosOrderBody:
+      type: object
+      properties:
+        customerId:
+          type: integer
+        productId:
+          type: integer
+        quantity:
+          type: number
+        paymentType:
+          type: string
+          enum: [cash, card, pix, promissory]
+        amountPaid:
+          type: number
+          description: Amount actually received at the cash register. Defaults to 0.
+        fulfillmentSource:
+          type: string
+          enum: [stock, production]
+          description: Take from stock or send to production
+        deliveryType:
+          type: string
+          enum: [delivery, pickup]
+        deliveryAddress:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+          description: For deliveries, the scheduled delivery date/time
+        notes:
+          type: string
+      required: [customerId, productId, quantity, paymentType, fulfillmentSource, deliveryType]
+
+    RegisterPaymentBody:
+      type: object
+      properties:
+        amountPaid:
+          type: number
+        paymentType:
+          type: string
+          enum: [cash, card, pix, promissory]
+      required: [amountPaid]
+
+    CashRegisterSummary:
+      type: object
+      properties:
+        date:
+          type: string
+        totalReceived:
+          type: number
+        totalPending:
+          type: number
+        ordersOpen:
+          type: integer
+        ordersCompleted:
+          type: integer
+        receivedByMethod:
+          type: object
+          properties:
+            cash:
+              type: number
+            card:
+              type: number
+            pix:
+              type: number
+            promissory:
+              type: number
+          required: [cash, card, pix, promissory]
+        recentOrders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+      required: [date, totalReceived, totalPending, ordersOpen, ordersCompleted, receivedByMethod, recentOrders]
 
     # Inventory
     InventoryItem:

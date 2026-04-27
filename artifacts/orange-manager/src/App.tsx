@@ -16,6 +16,7 @@ import Inventory from "@/pages/inventory";
 import Traceability from "@/pages/traceability";
 import Deliveries from "@/pages/deliveries";
 import Reports from "@/pages/reports";
+import POS from "@/pages/pos";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,7 @@ function Router() {
     <AppLayout>
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/pos" component={POS} />
         <Route path="/orders" component={Orders} />
         <Route path="/customers" component={Customers} />
         <Route path="/products" component={Products} />

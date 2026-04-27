@@ -11,7 +11,7 @@ export type OrderPaymentType =
 
 export const OrderPaymentType = {
   cash: "cash",
-  credit: "credit",
+  card: "card",
   pix: "pix",
-  invoice: "invoice",
+  promissory: "promissory",
 } as const;

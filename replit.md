@@ -29,6 +29,7 @@ A premium SaaS-style management system for orange production and distribution co
 ## Modules
 
 - Dashboard — KPI cards, production chart, order status, quality alerts
+- POS / Caixa — Frente de caixa: cadastro/seleção de cliente, produto (estoque ou produção), pagamento (dinheiro/cartão/pix/promissória), entrega ou retirada, controle de caixa do dia
 - Orders — Full order management with status workflow
 - Customers — Customer CRUD with purchase history
 - Products — Product catalog management

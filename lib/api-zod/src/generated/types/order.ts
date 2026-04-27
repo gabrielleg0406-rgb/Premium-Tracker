@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { OrderDeliveryType } from "./orderDeliveryType";
+import type { OrderFulfillmentSource } from "./orderFulfillmentSource";
+import type { OrderPaymentStatus } from "./orderPaymentStatus";
 import type { OrderPaymentType } from "./orderPaymentType";
 import type { OrderStatus } from "./orderStatus";
 
@@ -20,10 +22,14 @@ export interface Order {
   unit: string;
   totalPrice: number;
   paymentType: OrderPaymentType;
+  paymentStatus: OrderPaymentStatus;
+  amountPaid: number;
+  fulfillmentSource: OrderFulfillmentSource;
   status: OrderStatus;
   deliveryType: OrderDeliveryType;
-  deliveryAddress?: string;
-  notes?: string;
+  deliveryAddress?: string | null;
+  scheduledAt?: Date | null;
+  notes?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
