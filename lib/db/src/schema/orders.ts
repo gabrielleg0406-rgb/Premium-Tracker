@@ -18,6 +18,7 @@ export const ordersTable = pgTable("orders", {
   deliveryAddress: text("delivery_address"),
   scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
   notes: text("notes"),
+  responsible: text("responsible"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

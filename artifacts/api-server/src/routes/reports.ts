@@ -1,6 +1,14 @@
 import { Router } from "express";
-import { db, productionLotsTable, ordersTable, inventoryMovementsTable } from "@workspace/db";
-import { sql, count, sum, avg } from "drizzle-orm";
+import {
+  db,
+  productionLotsTable,
+  ordersTable,
+  inventoryMovementsTable,
+  customersTable,
+  productsTable,
+  rawMaterialsTable,
+} from "@workspace/db";
+import { sql, count, sum, avg, desc, eq } from "drizzle-orm";
 
 const router = Router();
 
@@ -170,6 +178,130 @@ router.get("/discards", async (req, res) => {
       reason,
       quantityKg: kg,
       count,
+    })),
+  });
+});
+
+router.get("/expedition", async (req, res) => {
+  const { from, to } = parseRange(req.query as Record<string, unknown>);
+
+  const rows = await db
+    .select({
+      id: ordersTable.id,
+      saleDate: ordersTable.createdAt,
+      buyerName: customersTable.name,
+      buyerDocument: customersTable.cnpj,
+      productName: productsTable.name,
+      unit: productsTable.unit,
+      quantity: ordersTable.quantity,
+      lotCode: productionLotsTable.lotCode,
+      expiresAt: productionLotsTable.expiresAt,
+      responsible: ordersTable.responsible,
+      status: ordersTable.status,
+    })
+    .from(ordersTable)
+    .leftJoin(customersTable, eq(ordersTable.customerId, customersTable.id))
+    .leftJoin(productsTable, eq(ordersTable.productId, productsTable.id))
+    .leftJoin(
+      productionLotsTable,
+      eq(productionLotsTable.orderId, ordersTable.id),
+    )
+    .where(sql`${ordersTable.createdAt} BETWEEN ${from} AND ${to}`)
+    .orderBy(desc(ordersTable.createdAt));
+
+  res.json({
+    from: from.toISOString(),
+    to: to.toISOString(),
+    totalRows: rows.length,
+    totalLiters: rows.reduce(
+      (acc, r) => acc + (r.unit === "liter" ? r.quantity : 0),
+      0,
+    ),
+    rows: rows.map((r) => ({
+      id: r.id,
+      saleDate: r.saleDate.toISOString(),
+      buyerName: r.buyerName ?? "—",
+      buyerDocument: r.buyerDocument ?? "—",
+      productName: r.productName ?? "—",
+      unit: r.unit ?? "unit",
+      quantity: r.quantity,
+      lotCode: r.lotCode ?? "—",
+      expiresAt: r.expiresAt ? r.expiresAt.toISOString() : null,
+      responsible: r.responsible ?? "—",
+      status: r.status,
+    })),
+  });
+});
+
+router.get("/production-control", async (req, res) => {
+  const { from, to } = parseRange(req.query as Record<string, unknown>);
+
+  const rows = await db
+    .select({
+      id: productionLotsTable.id,
+      productionDate: productionLotsTable.producedAt,
+      createdAt: productionLotsTable.createdAt,
+      shift: productionLotsTable.shift,
+      productName: productsTable.name,
+      unit: productionLotsTable.unit,
+      quantityProduced: productionLotsTable.quantityProduced,
+      lotCode: productionLotsTable.lotCode,
+      status: productionLotsTable.status,
+      qualityStatus: productionLotsTable.qualityStatus,
+      responsible: productionLotsTable.responsible,
+    })
+    .from(productionLotsTable)
+    .leftJoin(productsTable, eq(productionLotsTable.productId, productsTable.id))
+    .where(sql`${productionLotsTable.createdAt} BETWEEN ${from} AND ${to}`)
+    .orderBy(desc(productionLotsTable.createdAt));
+
+  res.json({
+    from: from.toISOString(),
+    to: to.toISOString(),
+    totalRows: rows.length,
+    totalLiters: rows.reduce(
+      (acc, r) => acc + (r.unit === "liter" ? r.quantityProduced : 0),
+      0,
+    ),
+    rows: rows.map((r) => ({
+      id: r.id,
+      productionDate: (r.productionDate ?? r.createdAt).toISOString(),
+      shift: r.shift,
+      productName: r.productName ?? "—",
+      unit: r.unit,
+      quantityProduced: r.quantityProduced,
+      lotCode: r.lotCode,
+      status: r.status,
+      qualityStatus: r.qualityStatus,
+      responsible: r.responsible ?? "—",
+    })),
+  });
+});
+
+router.get("/raw-material-receipt", async (req, res) => {
+  const { from, to } = parseRange(req.query as Record<string, unknown>);
+
+  const rows = await db
+    .select()
+    .from(rawMaterialsTable)
+    .where(sql`${rawMaterialsTable.entryDate} BETWEEN ${from} AND ${to}`)
+    .orderBy(desc(rawMaterialsTable.entryDate));
+
+  res.json({
+    from: from.toISOString(),
+    to: to.toISOString(),
+    totalRows: rows.length,
+    totalKg: rows.reduce((acc, r) => acc + r.quantityKg, 0),
+    rows: rows.map((r) => ({
+      id: r.id,
+      entryDate: r.entryDate.toISOString(),
+      invoiceNumber: r.invoiceNumber ?? "—",
+      productName: r.name,
+      supplier: r.supplier,
+      quantityKg: r.quantityKg,
+      quality: r.quality,
+      responsible: r.responsible ?? "—",
+      status: r.status,
     })),
   });
 });

@@ -1085,3 +1085,90 @@ export const GetDiscardReportResponse = zod.object({
     }),
   ),
 });
+
+/**
+ * @summary Shipping/expedition control report (sales-level rows)
+ */
+export const GetExpeditionReportQueryParams = zod.object({
+  from: zod.date().optional(),
+  to: zod.date().optional(),
+});
+
+export const GetExpeditionReportResponse = zod.object({
+  from: zod.coerce.date(),
+  to: zod.coerce.date(),
+  totalRows: zod.number(),
+  totalLiters: zod.number(),
+  rows: zod.array(
+    zod.object({
+      id: zod.number(),
+      saleDate: zod.coerce.date(),
+      buyerName: zod.string(),
+      buyerDocument: zod.string(),
+      productName: zod.string(),
+      unit: zod.string(),
+      quantity: zod.number(),
+      lotCode: zod.string(),
+      expiresAt: zod.coerce.date().nullish(),
+      responsible: zod.string(),
+      status: zod.string(),
+    }),
+  ),
+});
+
+/**
+ * @summary Production control report (lot-level rows)
+ */
+export const GetProductionControlReportQueryParams = zod.object({
+  from: zod.date().optional(),
+  to: zod.date().optional(),
+});
+
+export const GetProductionControlReportResponse = zod.object({
+  from: zod.coerce.date(),
+  to: zod.coerce.date(),
+  totalRows: zod.number(),
+  totalLiters: zod.number(),
+  rows: zod.array(
+    zod.object({
+      id: zod.number(),
+      productionDate: zod.coerce.date(),
+      shift: zod.enum(["morning", "afternoon", "night"]).nullish(),
+      productName: zod.string(),
+      unit: zod.string(),
+      quantityProduced: zod.number(),
+      lotCode: zod.string(),
+      status: zod.string(),
+      qualityStatus: zod.string(),
+      responsible: zod.string(),
+    }),
+  ),
+});
+
+/**
+ * @summary Raw material receipt control report
+ */
+export const GetRawMaterialReceiptReportQueryParams = zod.object({
+  from: zod.date().optional(),
+  to: zod.date().optional(),
+});
+
+export const GetRawMaterialReceiptReportResponse = zod.object({
+  from: zod.coerce.date(),
+  to: zod.coerce.date(),
+  totalRows: zod.number(),
+  totalKg: zod.number(),
+  rows: zod.array(
+    zod.object({
+      id: zod.number(),
+      entryDate: zod.coerce.date(),
+      invoiceNumber: zod.string(),
+      productName: zod.string(),
+      supplier: zod.string(),
+      quantityKg: zod.number(),
+      quality: zod.enum(["premium", "standard", "economy"]),
+      responsible: zod.string(),
+      status: zod.enum(["pending", "received", "rejected"]),
+    }),
+  ),
+});

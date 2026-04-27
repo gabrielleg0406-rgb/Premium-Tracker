@@ -33,12 +33,16 @@ import type {
   DelivererStats,
   Delivery,
   DiscardReport,
+  ExpeditionReport,
   FinancialReport,
   GetCashRegisterSummaryParams,
   GetDiscardReportParams,
+  GetExpeditionReportParams,
   GetFinancialReportParams,
+  GetProductionControlReportParams,
   GetProductionReportParams,
   GetQualityReportParams,
+  GetRawMaterialReceiptReportParams,
   HealthStatus,
   InventoryItem,
   InventoryMovement,
@@ -53,12 +57,14 @@ import type {
   OrderStatusBreakdown,
   Product,
   ProductionChartPoint,
+  ProductionControlReport,
   ProductionLot,
   ProductionReport,
   ProductionStats,
   QualityAlert,
   QualityReport,
   RawMaterial,
+  RawMaterialReceiptReport,
   RegisterPaymentBody,
   TraceabilityLot,
   UpdateDeliveryBody,
@@ -3827,6 +3833,324 @@ export function useGetDiscardReport<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetDiscardReportQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Shipping/expedition control report (sales-level rows)
+ */
+export const getGetExpeditionReportUrl = (
+  params?: GetExpeditionReportParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/reports/expedition?${stringifiedParams}`
+    : `/api/reports/expedition`;
+};
+
+export const getExpeditionReport = async (
+  params?: GetExpeditionReportParams,
+  options?: RequestInit,
+): Promise<ExpeditionReport> => {
+  return customFetch<ExpeditionReport>(getGetExpeditionReportUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetExpeditionReportQueryKey = (
+  params?: GetExpeditionReportParams,
+) => {
+  return [`/api/reports/expedition`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetExpeditionReportQueryOptions = <
+  TData = Awaited<ReturnType<typeof getExpeditionReport>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetExpeditionReportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getExpeditionReport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetExpeditionReportQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getExpeditionReport>>
+  > = ({ signal }) =>
+    getExpeditionReport(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getExpeditionReport>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetExpeditionReportQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getExpeditionReport>>
+>;
+export type GetExpeditionReportQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Shipping/expedition control report (sales-level rows)
+ */
+
+export function useGetExpeditionReport<
+  TData = Awaited<ReturnType<typeof getExpeditionReport>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetExpeditionReportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getExpeditionReport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetExpeditionReportQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Production control report (lot-level rows)
+ */
+export const getGetProductionControlReportUrl = (
+  params?: GetProductionControlReportParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/reports/production-control?${stringifiedParams}`
+    : `/api/reports/production-control`;
+};
+
+export const getProductionControlReport = async (
+  params?: GetProductionControlReportParams,
+  options?: RequestInit,
+): Promise<ProductionControlReport> => {
+  return customFetch<ProductionControlReport>(
+    getGetProductionControlReportUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetProductionControlReportQueryKey = (
+  params?: GetProductionControlReportParams,
+) => {
+  return [
+    `/api/reports/production-control`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetProductionControlReportQueryOptions = <
+  TData = Awaited<ReturnType<typeof getProductionControlReport>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetProductionControlReportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getProductionControlReport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetProductionControlReportQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getProductionControlReport>>
+  > = ({ signal }) =>
+    getProductionControlReport(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getProductionControlReport>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetProductionControlReportQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getProductionControlReport>>
+>;
+export type GetProductionControlReportQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Production control report (lot-level rows)
+ */
+
+export function useGetProductionControlReport<
+  TData = Awaited<ReturnType<typeof getProductionControlReport>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetProductionControlReportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getProductionControlReport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetProductionControlReportQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Raw material receipt control report
+ */
+export const getGetRawMaterialReceiptReportUrl = (
+  params?: GetRawMaterialReceiptReportParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/reports/raw-material-receipt?${stringifiedParams}`
+    : `/api/reports/raw-material-receipt`;
+};
+
+export const getRawMaterialReceiptReport = async (
+  params?: GetRawMaterialReceiptReportParams,
+  options?: RequestInit,
+): Promise<RawMaterialReceiptReport> => {
+  return customFetch<RawMaterialReceiptReport>(
+    getGetRawMaterialReceiptReportUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetRawMaterialReceiptReportQueryKey = (
+  params?: GetRawMaterialReceiptReportParams,
+) => {
+  return [
+    `/api/reports/raw-material-receipt`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetRawMaterialReceiptReportQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRawMaterialReceiptReport>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetRawMaterialReceiptReportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRawMaterialReceiptReport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetRawMaterialReceiptReportQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getRawMaterialReceiptReport>>
+  > = ({ signal }) =>
+    getRawMaterialReceiptReport(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRawMaterialReceiptReport>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetRawMaterialReceiptReportQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRawMaterialReceiptReport>>
+>;
+export type GetRawMaterialReceiptReportQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Raw material receipt control report
+ */
+
+export function useGetRawMaterialReceiptReport<
+  TData = Awaited<ReturnType<typeof getRawMaterialReceiptReport>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetRawMaterialReceiptReportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRawMaterialReceiptReport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetRawMaterialReceiptReportQueryOptions(
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

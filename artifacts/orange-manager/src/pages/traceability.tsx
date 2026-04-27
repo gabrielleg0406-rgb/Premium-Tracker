@@ -24,7 +24,7 @@ export default function Traceability() {
 
   const { data: lotData, isLoading: isLoadingLot, isError } = useGetTraceabilityLot(
     searchedLot || "",
-    { query: { enabled: !!searchedLot } }
+    { query: { enabled: !!searchedLot, queryKey: ["traceability", searchedLot ?? ""] } }
   );
 
   const handleSearch = (e: React.FormEvent) => {

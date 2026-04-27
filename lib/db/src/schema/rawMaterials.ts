@@ -12,6 +12,9 @@ export const rawMaterialsTable = pgTable("raw_materials", {
   quality: text("quality").notNull().$type<"premium" | "standard" | "economy">(),
   brixLevel: real("brix_level"),
   notes: text("notes"),
+  invoiceNumber: text("invoice_number"),
+  responsible: text("responsible"),
+  status: text("status").notNull().default("received").$type<"pending" | "received" | "rejected">(),
   entryDate: timestamp("entry_date", { withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

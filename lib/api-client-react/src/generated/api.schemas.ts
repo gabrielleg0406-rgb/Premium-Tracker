@@ -710,6 +710,97 @@ export interface DiscardReport {
   byReason: DiscardReportByReasonItem[];
 }
 
+export type ExpeditionReportRowsItem = {
+  id: number;
+  saleDate: string;
+  buyerName: string;
+  buyerDocument: string;
+  productName: string;
+  unit: string;
+  quantity: number;
+  lotCode: string;
+  expiresAt?: string | null;
+  responsible: string;
+  status: string;
+};
+
+export interface ExpeditionReport {
+  from: string;
+  to: string;
+  totalRows: number;
+  totalLiters: number;
+  rows: ExpeditionReportRowsItem[];
+}
+
+export type ProductionControlReportRowsItemShift =
+  | (typeof ProductionControlReportRowsItemShift)[keyof typeof ProductionControlReportRowsItemShift]
+  | null;
+
+export const ProductionControlReportRowsItemShift = {
+  morning: "morning",
+  afternoon: "afternoon",
+  night: "night",
+} as const;
+
+export type ProductionControlReportRowsItem = {
+  id: number;
+  productionDate: string;
+  shift?: ProductionControlReportRowsItemShift;
+  productName: string;
+  unit: string;
+  quantityProduced: number;
+  lotCode: string;
+  status: string;
+  qualityStatus: string;
+  responsible: string;
+};
+
+export interface ProductionControlReport {
+  from: string;
+  to: string;
+  totalRows: number;
+  totalLiters: number;
+  rows: ProductionControlReportRowsItem[];
+}
+
+export type RawMaterialReceiptReportRowsItemQuality =
+  (typeof RawMaterialReceiptReportRowsItemQuality)[keyof typeof RawMaterialReceiptReportRowsItemQuality];
+
+export const RawMaterialReceiptReportRowsItemQuality = {
+  premium: "premium",
+  standard: "standard",
+  economy: "economy",
+} as const;
+
+export type RawMaterialReceiptReportRowsItemStatus =
+  (typeof RawMaterialReceiptReportRowsItemStatus)[keyof typeof RawMaterialReceiptReportRowsItemStatus];
+
+export const RawMaterialReceiptReportRowsItemStatus = {
+  pending: "pending",
+  received: "received",
+  rejected: "rejected",
+} as const;
+
+export type RawMaterialReceiptReportRowsItem = {
+  id: number;
+  entryDate: string;
+  invoiceNumber: string;
+  productName: string;
+  supplier: string;
+  quantityKg: number;
+  quality: RawMaterialReceiptReportRowsItemQuality;
+  responsible: string;
+  status: RawMaterialReceiptReportRowsItemStatus;
+};
+
+export interface RawMaterialReceiptReport {
+  from: string;
+  to: string;
+  totalRows: number;
+  totalKg: number;
+  rows: RawMaterialReceiptReportRowsItem[];
+}
+
 export type ListCustomersParams = {
   search?: string;
   page?: number;
@@ -786,6 +877,21 @@ export type GetQualityReportParams = {
 };
 
 export type GetDiscardReportParams = {
+  from?: string;
+  to?: string;
+};
+
+export type GetExpeditionReportParams = {
+  from?: string;
+  to?: string;
+};
+
+export type GetProductionControlReportParams = {
+  from?: string;
+  to?: string;
+};
+
+export type GetRawMaterialReceiptReportParams = {
   from?: string;
   to?: string;
 };

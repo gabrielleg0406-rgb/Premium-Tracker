@@ -874,6 +874,78 @@ paths:
               schema:
                 $ref: "#/components/schemas/DiscardReport"
 
+  /reports/expedition:
+    get:
+      operationId: getExpeditionReport
+      tags: [reports]
+      summary: Shipping/expedition control report (sales-level rows)
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Expedition control report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpeditionReport"
+
+  /reports/production-control:
+    get:
+      operationId: getProductionControlReport
+      tags: [reports]
+      summary: Production control report (lot-level rows)
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Production control report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionControlReport"
+
+  /reports/raw-material-receipt:
+    get:
+      operationId: getRawMaterialReceiptReport
+      tags: [reports]
+      summary: Raw material receipt control report
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Raw material receipt report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RawMaterialReceiptReport"
+
 components:
   schemas:
     HealthStatus:
@@ -1776,3 +1848,163 @@ components:
                 type: integer
             required: [reason, quantityKg, count]
       required: [totalDiscardedKg, totalMovements, byReason]
+
+    ExpeditionReport:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        totalRows:
+          type: integer
+        totalLiters:
+          type: number
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              saleDate:
+                type: string
+                format: date-time
+              buyerName:
+                type: string
+              buyerDocument:
+                type: string
+              productName:
+                type: string
+              unit:
+                type: string
+              quantity:
+                type: number
+              lotCode:
+                type: string
+              expiresAt:
+                type: string
+                format: date-time
+                nullable: true
+              responsible:
+                type: string
+              status:
+                type: string
+            required:
+              - id
+              - saleDate
+              - buyerName
+              - buyerDocument
+              - productName
+              - unit
+              - quantity
+              - lotCode
+              - responsible
+              - status
+      required: [from, to, totalRows, totalLiters, rows]
+
+    ProductionControlReport:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        totalRows:
+          type: integer
+        totalLiters:
+          type: number
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              productionDate:
+                type: string
+                format: date-time
+              shift:
+                type: string
+                enum: [morning, afternoon, night]
+                nullable: true
+              productName:
+                type: string
+              unit:
+                type: string
+              quantityProduced:
+                type: number
+              lotCode:
+                type: string
+              status:
+                type: string
+              qualityStatus:
+                type: string
+              responsible:
+                type: string
+            required:
+              - id
+              - productionDate
+              - productName
+              - unit
+              - quantityProduced
+              - lotCode
+              - status
+              - qualityStatus
+              - responsible
+      required: [from, to, totalRows, totalLiters, rows]
+
+    RawMaterialReceiptReport:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        totalRows:
+          type: integer
+        totalKg:
+          type: number
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              entryDate:
+                type: string
+                format: date-time
+              invoiceNumber:
+                type: string
+              productName:
+                type: string
+              supplier:
+                type: string
+              quantityKg:
+                type: number
+              quality:
+                type: string
+                enum: [premium, standard, economy]
+              responsible:
+                type: string
+              status:
+                type: string
+                enum: [pending, received, rejected]
+            required:
+              - id
+              - entryDate
+              - invoiceNumber
+              - productName
+              - supplier
+              - quantityKg
+              - quality
+              - responsible
+              - status
+      required: [from, to, totalRows, totalKg, rows]

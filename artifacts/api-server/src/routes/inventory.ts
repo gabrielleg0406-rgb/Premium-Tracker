@@ -81,7 +81,7 @@ router.post("/entries", async (req, res) => {
       lotCode: body.lotCode,
       quantity: body.quantity,
       unit: body.unit ?? product?.unit ?? "kg",
-      expiryDate: body.expiryDate,
+      expiryDate: body.expiryDate ? body.expiryDate.toISOString().slice(0, 10) : undefined,
       status: "available",
     })
     .returning();
